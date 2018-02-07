@@ -1,0 +1,6 @@
+views.filter.translation_views_translation_count:
+  type: views.filter.numeric
+  label: 'Translation count'
+
+views.filter_value.translation_views_translation_count:
+  type: views.filter_value.numeric

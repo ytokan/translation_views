@@ -1,0 +1,81 @@
+<?php
+
+/**
+ * @file
+ * Provide hooks for translation_views module.
+ *
+ * Basicaly this file only used as workaround for this issue:
+ * https://www.drupal.org/node/2325463.
+ */
+
+use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function translation_views_module_implements_alter(&$implementations, $hook) {
+  switch ($hook) {
+    // Move our hook_form_alter() implementation to the end of the list.
+    case 'form_alter':
+      $group = $implementations['translation_views'];
+      unset($implementations['translation_views']);
+      $implementations['translation_views'] = $group;
+      break;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Add our submit for "source_langcode" submit.
+ */
+function translation_views_form_alter(&$form, FormStateInterface $form_state) {
+  $form_object = $form_state->getFormObject();
+
+  if (!($form_object instanceof ContentEntityFormInterface)) {
+    return;
+  }
+
+  $entity = $form_object->getEntity();
+  $op = $form_object->getOperation();
+
+  if ($entity instanceof ContentEntityInterface
+    && $entity->isTranslatable()
+    && count($entity->getTranslationLanguages()) > 1
+    && in_array($op, ['edit', 'add', 'default'], TRUE)
+  ) {
+    $form['source_langcode']['submit']['#submit'][] = 'translation_views_content_form_fix_destination';
+  }
+}
+
+/**
+ * Submit callback for "source_langcode" button.
+ */
+function translation_views_content_form_fix_destination($form, FormStateInterface $form_state) {
+  /* @var \Drupal\Core\Entity\ContentEntityFormInterface $form_object */
+  /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+  /* @var \Symfony\Component\HttpFoundation\ParameterBag $query */
+  $form_object = $form_state->getFormObject();
+  $entity      = $form_object->getEntity();
+  $source      = $form_state->getValue(['source_langcode', 'source']);
+  $query       = \Drupal::service('request_stack')->getCurrentRequest()->query;
+  $options     = [];
+
+  // Remove destination parameter from request,
+  // to allow "Change" button works like desired,
+  // see similar issue here: https://www.drupal.org/node/2325463.
+  // @todo: Create core issue for the content_translation module.
+  if ($query->has('destination')) {
+    $options['query']['destination'] = $query->get('destination');
+    $query->remove('destination');
+  }
+
+  $entity_type_id = $entity->getEntityTypeId();
+  $form_state->setRedirect("entity.$entity_type_id.content_translation_add", [
+    $entity_type_id => $entity->id(),
+    'source' => $source,
+    'target' => $form_object->getFormLangcode($form_state),
+  ], $options);
+}
