@@ -33,7 +33,7 @@ class TranslationStatusFilter extends FilterPluginBase {
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['value']['default'] = self::VALUE_BOTH;
+    $options['value']['default'] = FALSE;
 
     return $options;
   }
@@ -62,6 +62,24 @@ class TranslationStatusFilter extends FilterPluginBase {
   protected function valueForm(&$form, FormStateInterface $form_state) {
     parent::valueForm($form, $form_state);
 
+    $exposed = $form_state->get('exposed');
+
+    if (!empty($this->options['exposed'])) {
+      $identifier = $this->options['expose']['identifier'];
+      $user_input = $form_state->getUserInput();
+
+      // We need set exposed input to our "BOTH" value,
+      // when there is no selected value by user yet,
+      // usually when there is no any changes in exposed filters.
+      if ($exposed && !isset($user_input[$identifier])) {
+        $user_input = $form_state->getUserInput();
+        $user_input[$identifier] = self::VALUE_BOTH;
+
+        $form_state->setUserInput($user_input);
+        $this->view->setExposedInput($user_input);
+      }
+    }
+
     $form['value'] = [
       '#type' => 'select',
       '#title' => $this->t('Status'),
@@ -71,7 +89,7 @@ class TranslationStatusFilter extends FilterPluginBase {
         self::VALUE_TRANSLATED => t('Translated'),
       ],
       '#multiple' => FALSE,
-      '#default_value' => isset($this->value) ? $this->value : self::VALUE_BOTH,
+      '#default_value' => $this->value,
     ];
   }
 
