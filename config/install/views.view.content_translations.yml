@@ -81,25 +81,31 @@ display:
             title: title
             langcode: langcode
             translation_target_language: translation_target_language
+            translation_outdated: translation_outdated
             translation_status: translation_status
             changed: changed
             translation_operations: translation_operations
           info:
             title:
-              sortable: false
+              sortable: true
               default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false
               responsive: ''
             langcode:
-              sortable: false
+              sortable: true
               default_sort_order: asc
               align: ''
               separator: ''
               empty_column: false
               responsive: ''
             translation_target_language:
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            translation_outdated:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -107,7 +113,7 @@ display:
               empty_column: false
               responsive: ''
             translation_status:
-              sortable: false
+              sortable: true
               default_sort_order: desc
               align: ''
               separator: ''
@@ -525,7 +531,7 @@ display:
             identifier: langcode
             required: false
             remember: false
-            multiple: true
+            multiple: false
             remember_roles:
               authenticated: authenticated
               anonymous: '0'
@@ -678,7 +684,7 @@ display:
           exposed: true
           expose:
             operator_id: ''
-            label: Status
+            label: Translation status
             description: ''
             use_operator: false
             operator: translation_status_op
