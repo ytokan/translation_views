@@ -4,6 +4,7 @@ namespace Drupal\translation_views\Plugin\views\field;
 
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\TypedData\TranslationStatusInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\field\Boolean;
 use Drupal\translation_views\TranslationViewsTargetLanguage as TargetLanguage;
@@ -55,28 +56,40 @@ class TranslationStatus extends Boolean implements ContainerFactoryPluginInterfa
     $this->definition['output formats']['status'] = [
       t('Translated'), $this->t('Not translated'),
     ];
+    $this->field_alias = 'translation_status';
 
     parent::init($view, $display, $options);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * Convert translation status value into TranslationStatusInterface values.
    */
   public function render(ResultRow $values) {
-    $langcode = $this->getTargetLanguage();
-
-    /* @var $entity \Drupal\Core\TypedData\TranslationStatusInterface */
-    $entity = $this->getEntity($values);
-
-    $translation_status = $entity->getTranslationStatus($langcode);
-
-    $values->{$this->field_alias} = $translation_status;
+    $values->{$this->field_alias} = $values->{$this->field_alias} > 0
+      ? TranslationStatusInterface::TRANSLATION_EXISTING
+      : NULL;
     return parent::render($values);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * Expression wouldn't work without:
+   *
+   * @see translation_views_query_views_alter()
    */
-  public function query() {}
+  public function query() {
+    $table_alias = $this->ensureMyTable();
+    $this->query->addField(
+      NULL,
+      "FIND_IN_SET(:langcode, $table_alias.langs) > 0",
+      'translation_status',
+      [
+        'placeholders' => [':langcode' => '***TRANSLATION_VIEWS_TARGET_LANG***'],
+      ]
+    );
+  }
 
 }

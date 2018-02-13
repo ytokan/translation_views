@@ -8,6 +8,7 @@
  * https://www.drupal.org/node/2325463.
  */
 
+use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -78,4 +79,36 @@ function translation_views_content_form_fix_destination($form, FormStateInterfac
     'source' => $source,
     'target' => $form_object->getFormLangcode($form_state),
   ], $options);
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * Add support to use views query substitutions in expressions
+ * from hook_views_query_substitutions().
+ * Expressions can be used in views fields (i.e addField()),
+ * and views orderBy formula (i.e addOrderBy()).
+ *
+ * @todo Remove this workaround when will be solved in drupal core.
+ */
+function translation_views_query_views_alter(AlterableInterface $query) {
+  $substitutions = $query->getMetaData('views_substitutions');
+  $expressions =& $query->getExpressions();
+
+  foreach ($expressions as $field_id => &$item) {
+    foreach ($item['arguments'] as $replacement_key => $value) {
+      if (!is_array($value)) {
+        if (isset($substitutions[$value])) {
+          $expressions[$field_id]['arguments'][$replacement_key] = $substitutions[$value];
+        }
+      }
+      else {
+        foreach ($value as $sub_key => $sub_value) {
+          if (isset($substitutions[$sub_value])) {
+            $expressions[$field_id]['arguments'][$replacement_key][$sub_key] = $substitutions[$sub_value];
+          }
+        }
+      }
+    }
+  }
 }
