@@ -74,4 +74,11 @@ class TranslationTargetLanguageField extends LanguageField implements ContainerF
    */
   public function query() {}
 
+  /**
+   * {@inheritdoc}
+   */
+  public function clickSortable() {
+    return FALSE;
+  }
+
 }
