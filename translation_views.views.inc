@@ -90,16 +90,16 @@ function translation_views_views_data_alter(array &$data) {
         ];
 
         $translations_table_target += FieldDefinitions::buildOutdatedField(
-          $translations_table['content_translation_outdated']
+          $data[$field_data_table]['content_translation_outdated']
         );
         $translations_table_target += FieldDefinitions::buildSourceField(
-          $translations_table['content_translation_source']
+          $data[$field_data_table]['content_translation_source']
         );
         $translations_table_target += FieldDefinitions::buildDefaultLangcodeField(
-          $translations_table['default_langcode']
+          $data[$field_data_table]['default_langcode']
         );
         $translations_table_target += FieldDefinitions::buildChangedField(
-          $translations_table['changed']
+          $data[$field_data_table]['changed']
         );
       }
     }
