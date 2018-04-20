@@ -22,6 +22,13 @@ class TranslationCountFilter extends NumericFilter implements ContainerFactoryPl
   use TranslationCountTrait;
 
   /**
+   * Translation table alias.
+   *
+   * @var string
+   */
+  public $tableAlias = 'translations';
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {

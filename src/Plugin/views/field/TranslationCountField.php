@@ -20,6 +20,13 @@ class TranslationCountField extends NumericField implements ContainerFactoryPlug
   use TranslationCountTrait;
 
   /**
+   * Translation table alias.
+   *
+   * @var string
+   */
+  public $tableAlias = 'translations';
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, ViewsHandlerManager $join_handler) {

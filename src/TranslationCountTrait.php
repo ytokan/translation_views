@@ -13,13 +13,6 @@ use Drupal\views\Plugin\views\query\Sql as ViewsSqlQuery;
 trait TranslationCountTrait {
 
   /**
-   * Translation table alias.
-   *
-   * @var string
-   */
-  protected $tableAlias = 'translations';
-
-  /**
    * Ensure that translations table is joined.
    *
    * @param \Drupal\views\Plugin\views\query\Sql $query
