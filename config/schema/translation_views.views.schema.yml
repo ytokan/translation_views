@@ -4,3 +4,47 @@ views.filter.translation_views_translation_count:
 
 views.filter_value.translation_views_translation_count:
   type: views.filter_value.numeric
+  label: 'Filter rows by amount of translations (without default language)'
+
+views.filter.translation_views_source_equals_row:
+  type: views.filter.boolean
+  value: 'A boolean indicating whether the translation source of target language is same as the row language'
+
+views.filter.translation_views_status:
+  type: views_filter
+  label: 'A value indicating whether the node is translated into target language'
+  mapping:
+    value:
+      type: integer
+      label: 'Value'
+
+views.filter.translation_views_target_language:
+  type: views_filter
+  label: 'Target language'
+  mapping:
+    value:
+      type: string
+      label: 'Value'
+    remove:
+      type: boolean
+      label: 'Remove rows where source language is equal to target language'
+
+views.field.translation_views_translation_count:
+  type: views.field.numeric
+  label: 'Amount of translations (without default language)'
+
+views.field.translation_views_operations:
+  type: views_field
+  label: 'Provides links to perform translation operations'
+
+views.field.translation_views_source_equals_row:
+  type: views.field.boolean
+  label: 'A boolean indicating whether the translation source of target language is same as the row language'
+
+views.field.translation_views_status:
+  type: views.field.boolean
+  label: 'A boolean indicating whether the node is translated into target language'
+
+views.field.translation_views_target_language:
+  type: views.field.language
+  label: 'The target language'
