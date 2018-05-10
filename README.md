@@ -28,7 +28,7 @@ These fields/filters will display information about the current content in the s
 
 ## Requirements:
 - Drupal 8
-- PHP 5.6+
+- PHP 7+
 
 ## Installation:
 Install module as usually.
