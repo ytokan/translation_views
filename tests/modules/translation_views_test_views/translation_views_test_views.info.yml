@@ -1,0 +1,12 @@
+name: 'Translation views test view'
+type: module
+description: 'Provides full view for translation_views tests.'
+package: Testing
+version: VERSION
+core: 8.x
+dependencies:
+  - node
+  - views
+  - translation_views
+  - content_translation
+  - language
