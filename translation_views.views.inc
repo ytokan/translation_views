@@ -30,8 +30,7 @@ function translation_views_views_data_alter(array &$data) {
           $entity_type_id,
           'views_data'
         );
-      }
-      catch (PluginNotFound $e) {
+      } catch (PluginNotFound $e) {
         throw new PluginNotFound($entity_type_id, sprintf(
           'The "%s" entity type did not specify views_data handler class.',
           $entity_type->getLabel()
@@ -53,15 +52,16 @@ function translation_views_views_data_alter(array &$data) {
         $pk = $entity_type->getKey('id');
 
         $translations_table['table'] = [
-          'group' => $group,
+          'group'       => $group,
           'entity type' => $entity_type_id,
-          'join' => [
+          'join'        => [
             $field_data_table => [
-              'join_id' => 'translation_views_language_join',
-              'type' => 'LEFT',
+              'join_id'    => 'translation_views_language_join',
+              'entity_pk'  => $pk,
+              'type'       => 'LEFT',
               'left_field' => $pk,
-              'field' => $pk,
-              'table' => $field_data_table,
+              'field'      => $pk,
+              'table'      => $field_data_table,
             ],
           ],
         ];
@@ -73,13 +73,13 @@ function translation_views_views_data_alter(array &$data) {
 
         $translations_table_target['table'] = [
           'group' => $group,
-          'join' => [
+          'join'  => [
             $field_data_table => [
-              'type' => 'LEFT',
+              'type'       => 'LEFT',
               'left_field' => $pk,
-              'field' => $pk,
-              'table' => $field_data_table,
-              'extra' => [
+              'field'      => $pk,
+              'table'      => $field_data_table,
+              'extra'      => [
                 [
                   'field' => 'langcode',
                   'value' => '***TRANSLATION_VIEWS_TARGET_LANG***',

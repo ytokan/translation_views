@@ -21,12 +21,15 @@ class TranslationLanguageJoin extends JoinPluginBase implements ContainerFactory
    */
   protected $database;
 
+  protected $eid;
+
   /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->database = $database;
+    $this->eid = $this->configuration['entity_pk'];
   }
 
   /**
@@ -45,21 +48,20 @@ class TranslationLanguageJoin extends JoinPluginBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function buildJoin($select_query, $table, $view_query) {
-    $query = $this->database->select($this->table, 'nfd');
-    $query->fields('nfd', ['nid']);
+    $query = $this->database->select($this->table, 'efd');
+    $query->fields('efd', [$this->eid]);
 
     if (!empty($this->configuration['langcodes_as_count'])) {
-      $query->addExpression("COUNT(nfd.langcode)", 'count_langs');
+      $query->addExpression("COUNT(efd.langcode)", 'count_langs');
     }
     else {
-      $query->addExpression("GROUP_CONCAT(nfd.langcode separator ',')", 'langs');
+      $query->addExpression("GROUP_CONCAT(efd.langcode separator ',')", 'langs');
     }
 
     if (!empty($this->configuration['exclude_default_langcode'])) {
-      $query->where('nfd.default_langcode != 1');
+      $query->where('efd.default_langcode != 1');
     }
-
-    $query->groupBy('nfd.nid');
+    $query->groupBy('efd.' . $this->eid);
     $this->configuration['table formula'] = $query;
 
     parent::buildJoin($select_query, $table, $view_query);
