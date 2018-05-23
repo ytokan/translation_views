@@ -37,11 +37,11 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    * Checks that text is in specific row.
    *
    * @param int $row_number
-   *    Table row order number.
+   *   Table row order number.
    * @param string $css_class
-   *    Part of the css class of required field.
+   *   Part of the css class of required field.
    * @param string $text
-   *    Text that should be found in the element.
+   *   Text that should be found in the element.
    *
    * @throws \Behat\Mink\Exception\ElementTextException
    */
@@ -49,13 +49,14 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', "table > tbody > tr:nth-child({$row_number}) td.views-field-{$css_class}", $text);
   }
+
   /**
    * Cyclic check that text is in specific row.
    *
    * @param string $css_class
-   *    Part of the css class of required field.
+   *   Part of the css class of required field.
    * @param array $texts
-   *    Array of texts that should be found in the element
+   *   Array of texts that should be found in the element
    * and rows' order number.
    *
    * @throws \Behat\Mink\Exception\ElementTextException
@@ -70,7 +71,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    * Adds languages to Drupal.
    *
    * @param array $langcodes
-   *    Langcodes that should be added to Drupal.
+   *   Langcodes that should be added to Drupal.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
@@ -84,9 +85,9 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    * Change language settings for entity types.
    *
    * @param string $category
-   *    Entity category (e.g. Content).
+   *   Entity category (e.g. Content).
    * @param string $subcategory
-   *    Entity subcategory (e.g. Article).
+   *   Entity subcategory (e.g. Article).
    */
   private function enableTranslation($category, $subcategory) {
     $this->drupalPostForm('admin/config/regional/content-language', [
@@ -101,15 +102,15 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    * Set column sorting and order.
    *
    * @param string $orderColumn
-   *    Machine name of the column to be sorted.
+   *   Machine name of the column to be sorted.
    * @param string $sort
-   *    Sorting order (asc or desc).
+   *   Sorting order (asc or desc).
    * @param array $default_params
-   *    Langcode and Translation target language.
+   *   Langcode and Translation target language.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  private function assertOrder($orderColumn, $sort, $default_params = []) {
+  private function assertOrder($orderColumn, $sort, array $default_params = []) {
     $this->drupalGet($this->viewPath, [
       'query' => [
         'langcode'                    => $default_params[0],
@@ -241,7 +242,6 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
   /**
    * Tests columns' sorting.
    */
-
   public function testSorting() {
     // Title.
     $this->assertOrder('subject', 'asc', ['de', 'fr']);
@@ -253,7 +253,6 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 2 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 en from fr comment');
-
 
     $this->assertOrder('subject', 'desc', ['de', 'fr']);
     $this->assertTextInRowOrder('subject', [
