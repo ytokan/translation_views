@@ -57,7 +57,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    *   Part of the css class of required field.
    * @param array $texts
    *   Array of texts that should be found in the element
-   * and rows' order number.
+   *   and rows' order number.
    *
    * @throws \Behat\Mink\Exception\ElementTextException
    */
