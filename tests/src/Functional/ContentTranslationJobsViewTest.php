@@ -6,8 +6,7 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * This test will check translation_views Content translation jobs existence & and
- * functionality.
+ * Tests for fields, filters and sorting (Content translation jobs view).
  *
  * @group translation_views
  */

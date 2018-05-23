@@ -30,7 +30,8 @@ function translation_views_views_data_alter(array &$data) {
           $entity_type_id,
           'views_data'
         );
-      } catch (PluginNotFound $e) {
+      }
+      catch (PluginNotFound $e) {
         throw new PluginNotFound($entity_type_id, sprintf(
           'The "%s" entity type did not specify views_data handler class.',
           $entity_type->getLabel()

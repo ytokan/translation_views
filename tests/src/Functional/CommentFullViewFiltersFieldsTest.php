@@ -7,7 +7,7 @@ use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Tests\ViewTestData;
 
 /**
- * Tests for fields, filters and sorting for comment entity
+ * Tests for fields, filters and sorting for comment entity.
  *
  * @group translation_views
  */
@@ -31,25 +31,63 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    */
   public static $testViews = ['comment_translation'];
 
-  private $view_path = 'comment-translation';
+  private $viewPath = 'comment-translation';
 
+  /**
+   * Checks that text is in specific row.
+   *
+   * @param int $row_number
+   *    Table row order number.
+   * @param string $css_class
+   *    Part of the css class of required field.
+   * @param string $text
+   *    Text that should be found in the element.
+   *
+   * @throws \Behat\Mink\Exception\ElementTextException
+   */
   private function assertTextInRow($row_number, $css_class, $text) {
     $this->assertSession()
       ->elementTextContains('css', "table > tbody > tr:nth-child({$row_number}) td.views-field-{$css_class}", $text);
   }
-
+  /**
+   * Cyclic check that text is in specific row.
+   *
+   * @param string $css_class
+   *    Part of the css class of required field.
+   * @param array $texts
+   *    Array of texts that should be found in the element
+   * and rows' order number.
+   *
+   * @throws \Behat\Mink\Exception\ElementTextException
+   */
   private function assertTextInRowOrder($css_class, array $texts) {
     foreach ($texts as $id => $text) {
       $this->assertTextInRow($id, $css_class, $text);
     }
   }
 
+  /**
+   * Adds languages to Drupal.
+   *
+   * @param array $langcodes
+   *    Langcodes that should be added to Drupal.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
   private function addLanguages(array $langcodes) {
     foreach ($langcodes as $langcode) {
       ConfigurableLanguage::createFromLangcode($langcode)->save();
     }
   }
 
+  /**
+   * Change language settings for entity types.
+   *
+   * @param string $category
+   *    Entity category (e.g. Content).
+   * @param string $subcategory
+   *    Entity subcategory (e.g. Article).
+   */
   private function enableTranslation($category, $subcategory) {
     $this->drupalPostForm('admin/config/regional/content-language', [
       "entity_types[$category]"                                                   => 1,
@@ -59,8 +97,20 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     \Drupal::entityTypeManager()->clearCachedDefinitions();
   }
 
+  /**
+   * Set column sorting and order.
+   *
+   * @param string $orderColumn
+   *    Machine name of the column to be sorted.
+   * @param string $sort
+   *    Sorting order (asc or desc).
+   * @param array $default_params
+   *    Langcode and Translation target language.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   */
   private function assertOrder($orderColumn, $sort, $default_params = []) {
-    $this->drupalGet($this->view_path, [
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'langcode'                    => $default_params[0],
         'translation_target_language' => $default_params[1],
@@ -73,6 +123,9 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->statusCodeEquals(200);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
@@ -102,13 +155,13 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
 
     ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
 
-    // Add two languages
+    // Add two languages.
     $this->addLanguages(['de', 'fr']);
 
     // Enable translation for Comment entity type.
     $this->enableTranslation('comment', 'comment');
 
-    // Add 3 nodes
+    // Add 3 nodes.
     $this->drupalPostForm('node/add/article', [
       'title[0][value]'         => 'node 1',
       'created[0][value][date]' => '2018-04-01',
@@ -122,43 +175,43 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       'created[0][value][date]' => '2018-04-03',
     ], t('Save'));
 
-    // Add comments and translations
-    // comment 1
+    // Add comments and translations.
+    // Comment 1.
     $edit = [
       'langcode[0][value]'     => 'en',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 1 en comment',
     ];
     $this->drupalPostForm('node/1', $edit, 'Save');
-    // comment 2
+    // Comment 2.
     $edit = [
       'langcode[0][value]'     => 'de',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 1 de comment',
     ];
     $this->drupalPostForm('node/1', $edit, 'Save');
-    // comment 3
+    // Comment 3.
     $edit = [
       'langcode[0][value]'     => 'de',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 2 de comment',
     ];
     $this->drupalPostForm('node/2', $edit, 'Save');
-    // comment 4
+    // Comment 4.
     $edit = [
       'langcode[0][value]'     => 'fr',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 2 fr comment',
     ];
     $this->drupalPostForm('node/2', $edit, 'Save');
-    // comment 5
+    // Comment 5.
     $edit = [
       'langcode[0][value]'     => 'fr',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 3 fr comment',
     ];
     $this->drupalPostForm('node/3', $edit, 'Save');
-    // comment 6
+    // Comment 6.
     $edit = [
       'content_translation[retranslate]' => 1,
       'comment_body[0][value]'           => $this->loremIpsum,
@@ -171,7 +224,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    * Tests that the fields show all required information.
    */
   public function testFields() {
-    $this->drupalGet($this->view_path);
+    $this->drupalGet($this->viewPath);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertTextInRow(1, 'subject', 'node 1 en comment');
     $this->assertTextInRow(1, 'langcode', 'English');
@@ -190,7 +243,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    */
 
   public function testSorting() {
-    // Title
+    // Title.
     $this->assertOrder('subject', 'asc', ['de', 'fr']);
     $this->assertTextInRowOrder('subject', [
       1 => 'node 1 de comment',
@@ -212,7 +265,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 en from fr comment');
 
-    // Translation language
+    // Translation language.
     $this->assertOrder('langcode', 'asc', ['All', 'de']);
     $this->assertTextInRowOrder('langcode', [
       1 => 'German',
@@ -233,7 +286,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       1 => 'French',
     ]);
 
-    // Target language equals default language
+    // Target language equals default language.
     $this->assertOrder('translation_default', 'asc', ['All', 'fr']);
     $this->assertTextInRowOrder('translation-default', [
       1 => 'No',
@@ -254,7 +307,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       1 => 'Yes',
     ]);
 
-    // Translation changed time
+    // Translation changed time.
     $this->assertOrder('translation_changed', 'asc', ['All', 'fr']);
     $this->assertTextInRowOrder('translation-changed', [
       4 => ':',
@@ -269,7 +322,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       3 => ':',
     ]);
 
-    // Translation counter
+    // Translation counter.
     $this->assertOrder('translation_count', 'asc', ['en', 'fr']);
     $this->assertTextInRowOrder('translation-count', [
       1 => '0',
@@ -282,22 +335,20 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       1 => '1',
     ]);
 
-    // Translation outdated
+    // Translation outdated.
     $this->assertOrder('translation-outdated', 'asc', ['en', 'fr']);
     $this->assertTextInRowOrder('translation-outdated', [
       1 => 'No',
       2 => 'Yes',
     ]);
 
-    //    $this->assertOrderDirection('translation_count', $order = 'asc', $default_params = []);
-    //    $this->assertOrderDirection($order_field, $order = 'asc', $other_params = []);
     $this->assertOrder('translation-outdated', 'desc', ['en', 'fr']);
     $this->assertTextInRowOrder('translation-outdated', [
       1 => 'No',
       2 => 'Yes',
     ]);
 
-    // Translation source equals row language
+    // Translation source equals row language.
     $this->assertOrder('translation_source', 'asc', [
       'All',
       '***LANGUAGE_site_default***',
@@ -324,7 +375,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       1 => 'Yes',
     ]);
 
-    // Translation status
+    // Translation status.
     $this->assertOrder('translation_status', 'asc', [
       'All',
       '***LANGUAGE_site_default***',
@@ -358,8 +409,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    */
   public function testFilters() {
 
-    // Translation language
-    $this->drupalGet($this->view_path, [
+    // Translation language.
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'langcode' => 'en',
       ],
@@ -374,8 +425,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 2 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
 
-    // Translation language & Target language
-    $this->drupalGet($this->view_path, [
+    // Translation language & Target language.
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'langcode'                    => 'en',
         'translation_target_language' => 'fr',
@@ -390,8 +441,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 2 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
 
-    // Translation language & Target language & Translation outdated
-    $this->drupalGet($this->view_path, [
+    // Translation language & Target language & Translation outdated.
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'langcode'                    => 'en',
         'translation_target_language' => 'fr',
@@ -407,8 +458,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 2 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
 
-    // Translation status #1
-    $this->drupalGet($this->view_path, [
+    // Translation status #1.
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'translation_status' => '0',
       ],
@@ -422,8 +473,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()->pageTextNotContains('node 3 fr comment');
     $this->assertSession()->pageTextNotContains('node 3 en from fr comment');
 
-    // Translation status #2
-    $this->drupalGet($this->view_path, [
+    // Translation status #2.
+    $this->drupalGet($this->viewPath, [
       'query' => [
         'translation_status' => '1',
       ],

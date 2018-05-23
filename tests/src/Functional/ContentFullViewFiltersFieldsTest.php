@@ -7,8 +7,7 @@ use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\views\Tests\ViewTestData;
 
 /**
- * Tests the view (that shows Content) with all Content Translation fields and
- * filters.
+ * Tests for fields, filters and sorting for content entity.
  *
  * @group translation_views
  */
@@ -30,6 +29,9 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
    */
   public static $testViews = ['translation_views_all_filters_and_fields'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
@@ -219,7 +221,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
    * Test the sorting.
    */
   public function testSorting() {
-    // Title
+    // Title.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -260,7 +262,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', '005_fr_title_node2');
 
-    // Translation language
+    // Translation language.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -301,7 +303,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'French');
 
-    // Target language equals default language
+    // Target language equals default language.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -342,7 +344,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'Yes');
 
-    // Translation changed time
+    // Translation changed time.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -383,7 +385,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', ':');
 
-    // Translation counter
+    // Translation counter.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -424,7 +426,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', '2');
 
-    // Translation counter
+    // Translation counter.
     $this->drupalGet('translation-views-all-filters-and-fields', [
       'query' => [
         'content_translation_source'  => 'All',
@@ -465,4 +467,5 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'Translated');
   }
+
 }

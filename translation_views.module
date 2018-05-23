@@ -12,6 +12,7 @@ use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Entity\ContentEntityFormInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_module_implements_alter().
@@ -118,11 +119,11 @@ function translation_views_query_views_alter(AlterableInterface $query) {
  *
  * @inheritdoc
  */
-function translation_views_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function translation_views_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.translation_views':
       $text = file_get_contents(dirname(__FILE__) . '/README.md');
-      if (! \Drupal::moduleHandler()->moduleExists('markdown')) {
+      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
         return '<pre>' . $text . '</pre>';
       }
       else {

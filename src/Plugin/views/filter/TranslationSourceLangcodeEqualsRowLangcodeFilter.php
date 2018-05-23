@@ -18,7 +18,7 @@ class TranslationSourceLangcodeEqualsRowLangcodeFilter extends BooleanOperator {
    */
   public function query() {
     $table_alias = $this->ensureMyTable();
-    $base_table  = $this->view->storage->get('base_table');
+    $base_table = $this->view->storage->get('base_table');
 
     $this->query->addWhereExpression(
       $this->options['group'],

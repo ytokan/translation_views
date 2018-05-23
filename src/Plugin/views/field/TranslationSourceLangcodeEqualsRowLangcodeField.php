@@ -37,7 +37,7 @@ class TranslationSourceLangcodeEqualsRowLangcodeField extends Boolean {
    */
   public function query() {
     $table_alias = $this->ensureMyTable();
-    $base_table  = $this->view->storage->get('base_table');
+    $base_table = $this->view->storage->get('base_table');
 
     $this->query->addField(
       NULL,
