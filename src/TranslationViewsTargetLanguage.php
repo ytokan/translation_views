@@ -31,7 +31,9 @@ trait TranslationViewsTargetLanguage {
    */
   protected function getTargetLanguage() {
     $inputs   = $this->view->getExposedInput();
-    $langcode = $inputs[self::$targetExposedKey];
+    $langcode = isset($inputs[self::$targetExposedKey])
+      ? $inputs[self::$targetExposedKey]
+      : PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT;
 
     return $langcode == PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT
       ? $this->languageManager->getDefaultLanguage()->getId()

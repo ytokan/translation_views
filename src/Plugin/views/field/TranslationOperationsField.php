@@ -3,11 +3,15 @@
 namespace Drupal\translation_views\Plugin\views\field;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\translation_views\EntityInfo as HelperEntityInfo;
 use Drupal\translation_views\TranslationViewsTargetLanguage as TargetLanguage;
 use Drupal\views\Plugin\views\field\EntityOperations;
 use Drupal\views\ResultRow;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Renders translation operations links.
@@ -20,12 +24,51 @@ class TranslationOperationsField extends EntityOperations {
   use TargetLanguage;
 
   /**
+   * Current user account object.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    array $plugin_definition,
+    EntityManagerInterface $entity_manager,
+    LanguageManagerInterface $language_manager,
+    AccountProxyInterface $account
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $language_manager);
+    $this->currentUser = $account;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(
+    ContainerInterface $container,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition
+  ) {
+    return new static(
+      $configuration, $plugin_id, $plugin_definition,
+      $container->get('entity.manager'),
+      $container->get('language_manager'),
+      $container->get('current_user')
+    );
+  }
+
+  /**
    * {@inheritdoc}
    *
    * Build operation links.
    */
   public function render(ResultRow $values) {
-    /* @var ContentEntityInterface $entity */
+    /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity       = $this->getEntity($values);
     $langcode_key = $this->buildSourceEntityLangcodeKey($entity);
     $operations   = $this->getOperations($entity, $values->{$langcode_key});
@@ -39,7 +82,7 @@ class TranslationOperationsField extends EntityOperations {
       }
     }
     $build = [
-      '#type' => 'operations',
+      '#type'  => 'operations',
       '#links' => $operations,
     ];
     $build['#cache']['contexts'][] = 'url.query_args:target_language';
@@ -105,32 +148,36 @@ class TranslationOperationsField extends EntityOperations {
       $this->languageManager->getLanguage($row_lang)
     );
 
-    $is_source = $entity->getUntranslated()->language()->getId() === $entity_info->rowLanguage->getId();
+    $is_source = static::isSourceTranslation($entity_info);
 
     // Build edit & delete link.
     if (array_key_exists($current, $entity_info->translations)) {
       // If the user is allowed to edit the entity we point the edit link to
       // the entity form, otherwise if we are not dealing with the original
       // language we point the link to the translation form.
-      if ($entity->access('update', NULL, TRUE)->isAllowed()
+      if ($entity->access('update', NULL)
         && $entity_info->entityType->hasLinkTemplate('edit-form')
       ) {
         $links += $this->buildEditLink($entity_info, 'entity');
       }
-      elseif (!$is_source && $entity_info->getTranslationAccess('update')) {
+      elseif (!$is_source
+        && $entity_info->getTranslationAccess('update')
+        || $this->checkForOperationTranslationPermission('update')
+      ) {
         $links += $this->buildEditLink($entity_info, 'translation');
       }
 
       // Build delete link.
-      if (!$is_source) {
-        if ($entity->access('delete')
-          && $entity_info->entityType->hasLinkTemplate('delete-form')
-        ) {
-          $links += $this->buildDeleteLink($entity_info, 'entity');
-        }
-        elseif ($entity_info->getTranslationAccess('update')) {
-          $links += $this->buildDeleteLink($entity_info, 'translation');
-        }
+      if ($entity->access('delete')
+        && $entity_info->entityType->hasLinkTemplate('delete-form')
+      ) {
+        $links += $this->buildDeleteLink($entity_info, 'entity');
+      }
+      elseif (!$is_source
+        && $entity_info->getTranslationAccess('delete')
+        || $this->checkForOperationTranslationPermission('delete')
+      ) {
+        $links += $this->buildDeleteLink($entity_info, 'translation');
       }
     }
     // Build add link.
@@ -141,8 +188,44 @@ class TranslationOperationsField extends EntityOperations {
       // No such translation.
       $links += $this->buildAddLink($entity_info);
     }
-    return $links;
 
+    return $links;
+  }
+
+  /**
+   * Check if the current user has appropriate translation permission.
+   *
+   * @param string $operation
+   *   Operation name.
+   *
+   * @return bool
+   *   TRUE - if user permitted to perform specified operation, FALSE otherwise.
+   */
+  protected function checkForOperationTranslationPermission($operation) {
+    if (!in_array($operation, ['create', 'update', 'delete'], TRUE)) {
+      return FALSE;
+    }
+    return $this->currentUser
+      ->hasPermission("$operation content translations");
+  }
+
+  /**
+   * Check if current translation is the source translation.
+   *
+   * @param \Drupal\translation_views\EntityInfo $entity_info
+   *   Entity info object.
+   *
+   * @return bool
+   *   Checking result.
+   */
+  protected static function isSourceTranslation(HelperEntityInfo $entity_info) {
+    $source_langcode = $entity_info->entity
+      ->getUntranslated()
+      ->language()
+      ->getId();
+    $current_langcode = $entity_info->rowLanguage
+      ->getId();
+    return $source_langcode === $current_langcode;
   }
 
   /**
@@ -165,7 +248,7 @@ class TranslationOperationsField extends EntityOperations {
 
     $links['add'] = [
       'title' => $this->t('Add'),
-      'url' => $add_url,
+      'url'   => $add_url,
     ];
     return $links;
   }
@@ -182,15 +265,15 @@ class TranslationOperationsField extends EntityOperations {
 
     if ($type == 'entity') {
       $links['delete'] = [
-        'title' => $this->t('Delete'),
-        'url' => $entity_info->entity->urlInfo('delete-form'),
+        'title'    => $this->t('Delete'),
+        'url'      => $entity_info->entity->urlInfo('delete-form'),
         'language' => $entity_info->rowLanguage,
       ];
     }
     elseif ($type == 'translation') {
       $links['delete'] = [
         'title' => $this->t('Delete'),
-        'url' => new Url(
+        'url'   => new Url(
           "entity.{$entity_info->entityTypeId}.content_translation_delete",
           [
             'language' => $entity_info->rowLanguage->getId(),
