@@ -148,7 +148,7 @@ class TranslationOperationsField extends EntityOperations {
       $this->languageManager->getLanguage($row_lang)
     );
 
-    $is_source = static::isSourceTranslation($entity_info);
+    $is_default = static::isDefaultTranslation($entity_info);
 
     // Build edit & delete link.
     if (array_key_exists($current, $entity_info->translations)) {
@@ -160,7 +160,7 @@ class TranslationOperationsField extends EntityOperations {
       ) {
         $links += $this->buildEditLink($entity_info, 'entity');
       }
-      elseif (!$is_source
+      elseif (!$is_default
         && $entity_info->getTranslationAccess('update')
         || $this->checkForOperationTranslationPermission('update')
       ) {
@@ -173,7 +173,7 @@ class TranslationOperationsField extends EntityOperations {
       ) {
         $links += $this->buildDeleteLink($entity_info, 'entity');
       }
-      elseif (!$is_source
+      elseif (!$is_default
         && $entity_info->getTranslationAccess('delete')
         || $this->checkForOperationTranslationPermission('delete')
       ) {
@@ -210,7 +210,7 @@ class TranslationOperationsField extends EntityOperations {
   }
 
   /**
-   * Check if current translation is the source translation.
+   * Check if current translation is the default translation.
    *
    * @param \Drupal\translation_views\EntityInfo $entity_info
    *   Entity info object.
@@ -218,13 +218,12 @@ class TranslationOperationsField extends EntityOperations {
    * @return bool
    *   Checking result.
    */
-  protected static function isSourceTranslation(HelperEntityInfo $entity_info) {
+  protected static function isDefaultTranslation(HelperEntityInfo $entity_info) {
     $source_langcode = $entity_info->entity
       ->getUntranslated()
       ->language()
       ->getId();
-    $current_langcode = $entity_info->rowLanguage
-      ->getId();
+    $current_langcode = $entity_info->currentLanguage->getId();
     return $source_langcode === $current_langcode;
   }
 
@@ -267,7 +266,7 @@ class TranslationOperationsField extends EntityOperations {
       $links['delete'] = [
         'title'    => $this->t('Delete'),
         'url'      => $entity_info->entity->urlInfo('delete-form'),
-        'language' => $entity_info->rowLanguage,
+        'language' => $entity_info->currentLanguage,
       ];
     }
     elseif ($type == 'translation') {
@@ -276,11 +275,11 @@ class TranslationOperationsField extends EntityOperations {
         'url'   => new Url(
           "entity.{$entity_info->entityTypeId}.content_translation_delete",
           [
-            'language' => $entity_info->rowLanguage->getId(),
+            'language' => $entity_info->currentLanguage->getId(),
             $entity_info->entityTypeId => $entity_info->entity->id(),
           ],
           [
-            'language' => $entity_info->rowLanguage,
+            'language' => $entity_info->currentLanguage,
           ]
         ),
       ];
@@ -298,17 +297,17 @@ class TranslationOperationsField extends EntityOperations {
 
     if ($type == 'entity') {
       $links['edit']['url'] = $entity_info->entity->toUrl('edit-form');
-      $links['edit']['language'] = $entity_info->rowLanguage;
+      $links['edit']['language'] = $entity_info->currentLanguage;
     }
     elseif ($type == 'translation') {
       $links['edit']['url'] = new Url(
         "entity.{$entity_info->entityTypeId}.content_translation_edit",
         [
-          'language' => $entity_info->rowLanguage->getId(),
+          'language' => $entity_info->currentLanguage->getId(),
           $entity_info->entityTypeId => $entity_info->entity->id(),
         ],
         [
-          'language' => $entity_info->rowLanguage,
+          'language' => $entity_info->currentLanguage,
         ]
       );
       ;
