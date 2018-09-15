@@ -41,7 +41,7 @@ class TranslationSourceLangcodeEqualsRowLangcodeField extends Boolean {
 
     $this->query->addField(
       NULL,
-      "IF($table_alias.content_translation_source = $base_table.langcode, 1, 0)",
+      "IF(($table_alias.content_translation_source = $base_table.langcode) OR ($table_alias.default_langcode = 1), 1, 0)",
       'source_lang_eq_row'
     );
   }

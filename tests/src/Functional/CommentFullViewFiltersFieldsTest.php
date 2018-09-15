@@ -234,7 +234,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->assertTextInRow(1, 'translation-changed', ':');
     $this->assertTextInRow(1, 'translation-count', '0');
     $this->assertTextInRow(1, 'translation-outdated', 'No');
-    $this->assertTextInRow(1, 'translation-source', 'No');
+    $this->assertTextInRow(1, 'translation-source', 'Yes');
     $this->assertTextInRow(1, 'translation-status', 'Translated');
     $this->assertTextInRow(1, 'translation-operations', 'Edit');
   }
@@ -357,7 +357,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       2 => 'No',
       3 => 'No',
       4 => 'No',
-      5 => 'No',
+      5 => 'Yes',
       6 => 'Yes',
     ]);
 
@@ -370,7 +370,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       5 => 'No',
       4 => 'No',
       3 => 'No',
-      2 => 'No',
+      2 => 'Yes',
       1 => 'Yes',
     ]);
 

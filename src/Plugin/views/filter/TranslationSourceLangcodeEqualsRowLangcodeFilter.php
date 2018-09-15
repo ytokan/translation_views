@@ -22,7 +22,7 @@ class TranslationSourceLangcodeEqualsRowLangcodeFilter extends BooleanOperator {
 
     $this->query->addWhereExpression(
       $this->options['group'],
-      "IF($table_alias.content_translation_source $this->operator $base_table.langcode, 1, 0) = :value", [
+      "IF(($table_alias.content_translation_source $this->operator $base_table.langcode) OR ($table_alias.default_langcode $this->operator 1), 1, 0) = :value", [
         ':value' => $this->value,
       ]
     );
