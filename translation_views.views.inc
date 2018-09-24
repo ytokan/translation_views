@@ -99,9 +99,11 @@ function translation_views_views_data_alter(array &$data) {
         $translations_table_target += FieldDefinitions::buildDefaultLangcodeField(
           $data[$field_data_table]['default_langcode']
         );
-        $translations_table_target += FieldDefinitions::buildChangedField(
-          $data[$field_data_table]['changed']
-        );
+        if (isset($data[$field_data_table]['changed'])) {
+          $translations_table_target += FieldDefinitions::buildChangedField(
+            $data[$field_data_table]['changed']
+          );
+        }
       }
     }
   }
