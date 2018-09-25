@@ -144,4 +144,21 @@ final class TranslationViewsFieldDefinitions {
     return $field;
   }
 
+  /**
+   * Translation moderation state field definition.
+   */
+  public static function buildModerationStateField() {
+    return [
+      'translation_moderation_state' => [
+        'title' => t('Translation moderation state'),
+        'field' => [
+          'id'         => 'translation_moderation_state',
+          'property'   => 'translation_moderation_state',
+          'field_name' => t('Translation moderation state'),
+          'help'       => t('Moderation state of the translation.'),
+        ],
+      ],
+    ];
+  }
+
 }

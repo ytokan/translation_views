@@ -72,6 +72,10 @@ function translation_views_views_data_alter(array &$data) {
         $translations_table += FieldDefinitions::buildOpLinksField();
         $translations_table += FieldDefinitions::buildCountField();
 
+        $module_handler = \Drupal::service('module_handler');
+        if ($module_handler->moduleExists('content_moderation')) {
+          $translations_table += FieldDefinitions::buildModerationStateField();
+        }
         $translations_table_target['table'] = [
           'group' => $group,
           'join'  => [

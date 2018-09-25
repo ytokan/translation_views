@@ -48,3 +48,11 @@ views.field.translation_views_status:
 views.field.translation_views_target_language:
   type: views.field.language
   label: 'The target language'
+
+views.field.translation_moderation_state:
+  type: views_field
+  label: 'Translation moderation state'
+  mapping:
+    display_name:
+      type: string
+      label: 'Formatter'

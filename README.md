@@ -24,6 +24,7 @@ These fields/filters will display information about the current content in the s
 - Translation changed time: `field`
 - Translation source equals row language: `field`,`filter`: Checks if the source translation of the target language is the same as the language of the row
 - Translation operations: `field`
+- Translation moderation state: `field`
 
 **Source translation**
 - Translation counter: `field`,`filter`

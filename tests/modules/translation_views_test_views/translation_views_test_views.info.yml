@@ -9,3 +9,5 @@ dependencies:
   - drupal:translation_views
   - drupal:content_translation
   - drupal:language
+  - drupal:content_moderation
+  - drupal:workflows

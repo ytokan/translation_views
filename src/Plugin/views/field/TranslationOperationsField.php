@@ -2,8 +2,10 @@
 
 namespace Drupal\translation_views\Plugin\views\field;
 
+use Drupal\content_translation\ContentTranslationManager;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
@@ -29,6 +31,12 @@ class TranslationOperationsField extends EntityOperations {
    * @var \Drupal\Core\Session\AccountProxyInterface
    */
   protected $currentUser;
+  /**
+   * Entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManager
+   */
+  protected $entityTypeManager;
 
   /**
    * {@inheritdoc}
@@ -38,11 +46,13 @@ class TranslationOperationsField extends EntityOperations {
     $plugin_id,
     array $plugin_definition,
     EntityManagerInterface $entity_manager,
+    EntityTypeManager $entity_type_manager,
     LanguageManagerInterface $language_manager,
     AccountProxyInterface $account
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $language_manager);
-    $this->currentUser = $account;
+    $this->currentUser       = $account;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -57,6 +67,7 @@ class TranslationOperationsField extends EntityOperations {
     return new static(
       $configuration, $plugin_id, $plugin_definition,
       $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('language_manager'),
       $container->get('current_user')
     );
@@ -127,6 +138,7 @@ class TranslationOperationsField extends EntityOperations {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getOperations(ContentEntityInterface $entity, $row_lang) {
     $links   = [];
@@ -180,6 +192,23 @@ class TranslationOperationsField extends EntityOperations {
         $links += $this->buildDeleteLink($entity_info, 'translation');
       }
     }
+    // Check if there are pending revisions
+    elseif ($this->pendingRevisionExist($entity_info)) {
+      // If the user is allowed to edit the entity we point the edit link to
+      // the entity form, otherwise if we are not dealing with the original
+      // language we point the link to the translation form.
+      if ($entity->access('update', NULL)
+        && $entity_info->entityType->hasLinkTemplate('edit-form')
+      ) {
+        $links += $this->buildEditLink($entity_info, 'entity');
+      }
+      elseif (!$is_default
+        && $entity_info->getTranslationAccess('update')
+        || $this->checkForOperationTranslationPermission('update')
+      ) {
+        $links += $this->buildEditLink($entity_info, 'translation');
+      }
+    }
     // Build add link.
     elseif (!empty($current)
       && $entity_info->translatable
@@ -225,6 +254,35 @@ class TranslationOperationsField extends EntityOperations {
       ->getId();
     $current_langcode = $entity_info->currentLanguage->getId();
     return $source_langcode === $current_langcode;
+  }
+
+  /**
+   * Check if pending revision exist for this translation
+   *
+   * @param \Drupal\translation_views\EntityInfo $entity_info
+   *   Entity info object.
+   *
+   * @return bool
+   *   TRUE - if pending revision exist, FALSE otherwise.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function pendingRevisionExist(HelperEntityInfo $entity_info) {
+    $pending_revision_enabled = ContentTranslationManager::isPendingRevisionSupportEnabled($entity_info->entityTypeId);
+    if ($this->moduleHandler->moduleExists('content_moderation') && $pending_revision_enabled) {
+      /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
+      $storage = $this->entityTypeManager->getStorage($entity_info->entityTypeId);
+      $entity  = $storage->load($entity_info->entity->id());
+      $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId(
+        $entity->id(),
+        $entity_info->currentLanguage->getId()
+      );
+      if ($translation_has_revision) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**
