@@ -612,7 +612,7 @@ display:
             identifier: translation_target_language
             required: true
             remember: true
-            multiple: true
+            multiple: false
             remember_roles:
               anonymous: anonymous
               authenticated: authenticated

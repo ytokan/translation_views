@@ -50,10 +50,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
 
     $form['expose']['identifier'] = [
       '#type' => 'hidden',
-      '#value' => $this->options['expose']['identifier'],
-      '#title' => $this->t('Filter identifier'),
-      '#size' => 40,
-      '#description' => $this->t('This will appear in the URL after the ? to identify this filter. Cannot be blank. Only letters, digits and the dot ("."), hyphen ("-"), underscore ("_"), and tilde ("~") characters are allowed.'),
+      '#value' => static::$targetExposedKey,
     ];
   }
 
@@ -62,9 +59,18 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['expose']['identifier'] = static::$targetExposedKey;
+
+    $options['expose']['contains']['label'] = [
+      'default' => $this->t('Target language'),
+    ];
+
+    $options['expose']['contains']['identifier'] = [
+      'default' => static::$targetExposedKey,
+    ];
+
     $options['value']['default'] = '';
-    $options['remove']['default'] = FALSE;
+    $options['remove']['default'] = TRUE;
+    $options['exposed']['default'] = TRUE;
 
     return $options;
   }
@@ -88,13 +94,20 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       }
     }
 
+    $this->always_required = TRUE;
+
     $form['value'] = [
       '#type' => 'select',
       '#title' => $this->t('Target language'),
       '#options' => $this->buildLanguageOptions(),
       '#multiple' => FALSE,
-      '#weight' => 0,
+      '#required' => TRUE,
       '#default_value' => $this->value,
+    ];
+
+    $form['expose']['identifier'] = [
+      '#type' => 'hidden',
+      '#value' => static::$targetExposedKey,
     ];
 
     if (!$exposed) {
@@ -119,7 +132,6 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
     if (isset($options[$site_default->getId()])) {
       unset($options[$site_default->getId()]);
     }
-
     return [PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT => $site_default->getName()] + $options;
   }
 
