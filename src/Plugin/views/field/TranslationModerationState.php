@@ -138,7 +138,7 @@ class TranslationModerationState extends FieldPluginBase {
           $translation       = $latest_revision->getTranslation($target_lang);
           $translation_state = $translation->moderation_state->value;
 
-          if (!empty($this->options['display_name'])) {
+          if (!empty($this->options['display_name']) && $workflow !== NULL) {
             if ($this->options['display_name'] == 'state') {
               $translation_label = $workflow->getTypePlugin()
                 ->getState($translation_state)
