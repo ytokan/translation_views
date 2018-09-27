@@ -116,7 +116,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
         'langcode'                    => $default_params[0],
         'translation_target_language' => $default_params[1],
         'translation_outdated'        => 'All',
-        'translation_status'          => 2,
+        'translation_status'          => 'All',
         'order'                       => $orderColumn,
         'sort'                        => $sort,
       ],

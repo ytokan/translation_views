@@ -11,12 +11,8 @@ views.filter.translation_views_source_equals_row:
   value: 'A boolean indicating whether the translation source of target language is same as the row language'
 
 views.filter.translation_views_status:
-  type: views_filter
-  label: 'A value indicating whether the node is translated into target language'
-  mapping:
-    value:
-      type: integer
-      label: 'Value'
+  type: views.filter.boolean
+  label: 'A boolean indicating whether the node is translated into target language'
 
 views.filter.translation_views_target_language:
   type: views_filter

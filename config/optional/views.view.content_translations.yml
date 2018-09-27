@@ -679,7 +679,7 @@ display:
           group_type: group
           admin_label: ''
           operator: '='
-          value: 2
+          value: All
           group: 1
           exposed: true
           expose:
@@ -754,7 +754,7 @@ display:
           group_type: group
           admin_label: ''
           operator: '='
-          value: 0
+          value: '0'
           group: 2
           exposed: false
           expose:
@@ -827,7 +827,7 @@ display:
           group_type: group
           admin_label: ''
           operator: '='
-          value: 0
+          value: '0'
           group: 3
           exposed: false
           expose:

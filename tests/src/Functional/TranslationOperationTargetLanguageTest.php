@@ -167,7 +167,7 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
         'content_translation_source'  => 'All',
         'translation_target_language' => $target_language,
         'translation_default'         => 'All',
-        'translation_status'          => 2,
+        'translation_status'          => 'All',
       ],
     ]);
     $this->assertResponseOk();
@@ -188,7 +188,7 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
         'content_translation_source'  => 'All',
         'translation_target_language' => $target_language,
         'translation_default'         => 'All',
-        'translation_status'          => 2,
+        'translation_status'          => 'All',
       ],
     ]);
     $this->assertResponseOk();

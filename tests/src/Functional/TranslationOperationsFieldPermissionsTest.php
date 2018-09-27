@@ -214,7 +214,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
       'langcode'                    => $default_language->getId(),
       'translation_target_language' => $target_language,
       'translation_outdated'        => 'All',
-      'translation_status'          => '2',
+      'translation_status'          => 'All',
     ]]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->elementNotExists(
@@ -229,7 +229,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
       'langcode'                    => $default_language->getId(),
       'translation_target_language' => $target_language,
       'translation_outdated'        => 'All',
-      'translation_status'          => '2',
+      'translation_status'          => 'All',
     ]]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
