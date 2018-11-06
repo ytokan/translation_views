@@ -6,3 +6,6 @@ package: Multilingual
 dependencies:
   - drupal:content_translation
   - drupal:views
+
+test_dependencies:
+  - local_translation:local_translation
