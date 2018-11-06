@@ -1,0 +1,13 @@
+name: 'Translation views Local Translation integration test'
+type: module
+description: ''
+package: Testing
+core: 8.x
+dependencies:
+  - drupal:node
+  - drupal:views
+  - drupal:translation_views
+  - drupal:content_translation
+  - drupal:language
+  - local_translation:local_translation
+  - local_translation:local_translation_content
