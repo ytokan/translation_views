@@ -69,6 +69,10 @@ Hidden filters
 - The target language must be untranslated or outdated: Make sure translated and updated content disappear from the list.
 - The target language must be untranslated or the same as the source language of translation: This makes sure that once there is a translation in target language it will only be displayed if the source language is the correct source language. If target language is not translated you can use different language as source translation.
 
+MODULE INTEGRATION
+-------------
+You can limit the target language filter list to the users registered translation skill if you're using [Local Translation](https://www.drupal.org/project/local_translation)
+
 MAINTAINERS
 -----------
 Developed by [vlad.dancer](https://drupal.org/u/vladdancer)  
