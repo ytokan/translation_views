@@ -34,7 +34,7 @@ trait TranslationCountTrait {
         'field' => $keys['id'],
         'table' => $query_base_table,
         'left_table' => $query_base_table,
-        'exclude_default_langcode' => TRUE,
+        'include_original_language' => !empty($this->options['include_original_language']),
         'langcodes_as_count' => TRUE,
         'entity_pk'  => $keys['id'],
       ];

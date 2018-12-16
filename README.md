@@ -27,7 +27,7 @@ These fields/filters will display information about the current content in the s
 - Translation moderation state: `field`
 
 **Source translation**
-- Translation counter: `field`,`filter`
+- Translation counter: `field`,`filter`: count translations of oirignal language. You can also configure the field to include original language in the count.
 
 REQUIREMENTS
 ------------

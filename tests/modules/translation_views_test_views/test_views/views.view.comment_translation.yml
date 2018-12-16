@@ -514,6 +514,7 @@ display:
           format_plural_string: !!binary MQNAY291bnQ=
           prefix: ''
           suffix: ''
+          include_original_language: false
           entity_type: comment
           plugin_id: translation_views_translation_count
         translation_outdated:

@@ -2,6 +2,7 @@
 
 namespace Drupal\translation_views\Plugin\views\field;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\translation_views\TranslationCountTrait;
 use Drupal\views\Plugin\views\field\NumericField;
@@ -55,6 +56,28 @@ class TranslationCountField extends NumericField implements ContainerFactoryPlug
     $query = $this->query;
     $join_alias = $this->joinLanguages($query);
     $this->field_alias = $query->addField($join_alias, 'count_langs', $this->realField);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function defineOptions() {
+    $options = parent::defineOptions();
+    $options['include_original_language'] = ['default' => FALSE];
+    return $options;
+  }
+
+  /**
+   * Provide option to include original language in count
+   */
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+    $form['include_original_language'] = [
+      '#title' => $this->t('Include original language in count'),
+      '#description' => $this->t("Enable to also count the original language."),
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->options['include_original_language']),
+    ];
+    parent::buildOptionsForm($form, $form_state);
   }
 
 }

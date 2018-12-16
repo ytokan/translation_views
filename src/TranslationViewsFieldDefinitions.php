@@ -44,11 +44,11 @@ final class TranslationViewsFieldDefinitions {
         'title' => t('Translation counter'),
         'field' => [
           'id' => 'translation_views_translation_count',
-          'help' => t('Amount of translations (without default language).'),
+          'help' => t('Amount of translations.'),
         ],
         'filter' => [
           'id' => 'translation_views_translation_count',
-          'help' => t('Filter rows by amount of translations (without default language).'),
+          'help' => t('Filter rows by amount of translations.'),
         ],
       ],
     ];

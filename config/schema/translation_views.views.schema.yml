@@ -40,7 +40,11 @@ views.filter.translation_views_target_language:
 
 views.field.translation_views_translation_count:
   type: views.field.numeric
-  label: 'Amount of translations (without default language)'
+  label: 'Amount of translations'
+  mapping:
+    include_original_language:
+      type: boolean
+      label: 'Include original language in count'
 
 views.field.translation_views_operations:
   type: views_field

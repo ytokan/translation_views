@@ -53,13 +53,13 @@ class TranslationLanguageJoin extends JoinPluginBase implements ContainerFactory
 
     if (!empty($this->configuration['langcodes_as_count'])) {
       $query->addExpression("COUNT(efd.langcode)", 'count_langs');
+      if (isset($this->configuration['include_original_language'])
+          && $this->configuration['include_original_language'] == false) {
+        $query->where('efd.default_langcode != 1');
+      }
     }
     else {
       $query->addExpression("GROUP_CONCAT(efd.langcode separator ',')", 'langs');
-    }
-
-    if (!empty($this->configuration['exclude_default_langcode'])) {
-      $query->where('efd.default_langcode != 1');
     }
     $query->groupBy('efd.' . $this->eid);
     $this->configuration['table formula'] = $query;
