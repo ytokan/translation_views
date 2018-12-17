@@ -4,8 +4,9 @@
  * @file
  * Provide hooks for translation_views module.
  *
- * Basicaly this file only used as workaround for this issue:
- * https://www.drupal.org/node/2325463.
+ * Basicaly this file is only used as workaround for these issues:
+ * https://www.drupal.org/project/drupal/issues/2954032
+ * https://www.drupal.org/project/drupal/issues/2944278
  */
 
 use Drupal\Core\Database\Query\AlterableInterface;
@@ -66,9 +67,7 @@ function translation_views_content_form_fix_destination($form, FormStateInterfac
   $options     = [];
 
   // Remove destination parameter from request,
-  // to allow "Change" button works like desired,
-  // see similar issue here: https://www.drupal.org/node/2325463.
-  // @todo: Create core issue for the content_translation module.
+  // to allow "Change" button works like desired
   if ($query->has('destination')) {
     $options['query']['destination'] = $query->get('destination');
     $query->remove('destination');
