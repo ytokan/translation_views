@@ -66,7 +66,6 @@ Exposed filters:
 Hidden filters
 - Source content outdated must be false: Make sure you do not translation from outdated nodes.
 - Target language equals default language must be false: As there is no use to check status of original language as a target language.
-- The target language must be untranslated or outdated: Make sure translated and updated content disappear from the list.
 - The target language must be untranslated or the same as the source language of translation: This makes sure that once there is a translation in target language it will only be displayed if the source language is the correct source language. If target language is not translated you can use different language as source translation.
 
 MODULE INTEGRATION
