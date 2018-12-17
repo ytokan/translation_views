@@ -4,7 +4,7 @@ views.filter.translation_views_translation_count:
 
 views.filter_value.translation_views_translation_count:
   type: views.filter_value.numeric
-  label: 'Filter rows by amount of translations (without default language)'
+  label: 'Filter rows by amount of translations'
 
 views.filter.translation_views_source_equals_row:
   type: views.filter.boolean
