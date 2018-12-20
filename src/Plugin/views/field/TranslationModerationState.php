@@ -40,7 +40,9 @@ class TranslationModerationState extends FieldPluginBase {
    * {@inheritdoc}
    */
   public function __construct(
-    array $configuration, $plugin_id, $plugin_definition,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
     ModerationInformationInterface $moderation_info,
     LanguageManagerInterface $language_manager,
     EntityTypeManager $entity_type_manager
@@ -85,7 +87,7 @@ class TranslationModerationState extends FieldPluginBase {
     $default_value = 'state';
     $states = [
       'state' => $this->t('Moderation State'),
-      'name'  => $this->t('Machine Name')
+      'name'  => $this->t('Machine Name'),
     ];
     if (!empty($this->options['display_name'])) {
       $default_value = $this->options['display_name'];

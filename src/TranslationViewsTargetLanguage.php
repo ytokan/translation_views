@@ -20,14 +20,18 @@ trait TranslationViewsTargetLanguage {
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
-
+  /**
+   * Target exposed key.
+   *
+   * @var string
+   */
   public static $targetExposedKey = 'translation_target_language';
 
   /**
    * Get target language from exposed input.
    *
    * @return string
-   *   Current selected target langcode
+   *   The selected target langcode.
    */
   protected function getTargetLanguage() {
     $inputs   = $this->view->getExposedInput();

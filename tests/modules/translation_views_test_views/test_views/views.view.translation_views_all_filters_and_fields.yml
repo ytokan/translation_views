@@ -322,7 +322,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Target language equals default language'
+          label: 'Source translation of target language equals row language'
           exclude: false
           alter:
             alter_text: false
@@ -542,7 +542,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Translation source equals row language'
+          label: 'Source translation of target language equals row language'
           exclude: false
           alter:
             alter_text: false

@@ -2,7 +2,6 @@
 
 namespace Drupal\translation_views\Plugin\views\filter;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\filter\BooleanOperator;
 
 /**
@@ -14,6 +13,9 @@ use Drupal\views\Plugin\views\filter\BooleanOperator;
  */
 class TranslationStatusFilter extends BooleanOperator {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getValueOptions() {
     $this->valueOptions = [1 => $this->t('Translated'), 0 => $this->t('Not translated')];
   }

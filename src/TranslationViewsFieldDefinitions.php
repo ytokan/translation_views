@@ -10,7 +10,7 @@ namespace Drupal\translation_views;
 final class TranslationViewsFieldDefinitions {
 
   /**
-   * Ttranslation status field definition.
+   * Translation status field definition.
    */
   public static function buildStatusField() {
     return [
@@ -34,7 +34,7 @@ final class TranslationViewsFieldDefinitions {
   }
 
   /**
-   * Translations count field definition.
+   * Translation count field definition.
    */
   public static function buildCountField() {
     return [
@@ -93,7 +93,7 @@ final class TranslationViewsFieldDefinitions {
     $field['translation_source']['filter']['id'] = 'translation_views_source_equals_row';
     $field['translation_source']['field']['help'] = t('A boolean indicating whether the translation source of target language is same as the row language');
     $field['translation_source']['filter']['help'] = t('A boolean indicating whether the translation source of target language is same as the row language');
-    $field['translation_source']['title'] = t('Translation source equals row language');
+    $field['translation_source']['title'] = t('Source translation of target language equals row language');
     return $field;
   }
 

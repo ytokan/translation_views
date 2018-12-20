@@ -210,12 +210,14 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertTrue($this->userCreate->hasPermission('create content translations'));
     $this->assertFalse($this->userCreate->hasPermission('translate any entity'));
 
-    $this->drupalGet('/translate/content', ['query' => [
-      'langcode'                    => $default_language->getId(),
-      'translation_target_language' => $target_language,
-      'translation_outdated'        => 'All',
-      'translation_status'          => 'All',
-    ]]);
+    $this->drupalGet('/translate/content', [
+      'query' => [
+        'langcode'                    => $default_language->getId(),
+        'translation_target_language' => $target_language,
+        'translation_outdated'        => 'All',
+        'translation_status'          => 'All',
+      ],
+    ]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->elementNotExists(
       'css',
@@ -225,12 +227,14 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->addPermissionsForAuthUser(['translate any entity']);
     $this->assertTrue($this->userCreate->hasPermission('translate any entity'));
 
-    $this->drupalGet('/translate/content', ['query' => [
-      'langcode'                    => $default_language->getId(),
-      'translation_target_language' => $target_language,
-      'translation_outdated'        => 'All',
-      'translation_status'          => 'All',
-    ]]);
+    $this->drupalGet('/translate/content', [
+      'query' => [
+        'langcode'                    => $default_language->getId(),
+        'translation_target_language' => $target_language,
+        'translation_outdated'        => 'All',
+        'translation_status'          => 'All',
+      ],
+    ]);
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementTextContains(

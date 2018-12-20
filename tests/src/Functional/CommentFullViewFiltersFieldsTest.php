@@ -347,7 +347,7 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       2 => 'Yes',
     ]);
 
-    // Translation source equals row language.
+    // Source translation of target language equals row language.
     $this->assertOrder('translation_source', 'asc', [
       'All',
       '***LANGUAGE_site_default***',

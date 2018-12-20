@@ -130,8 +130,8 @@ class TranslationOperationsField extends EntityOperations {
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *   The source entity to get context for decision.
-   * @param string $row_lang
-   *   The target langcode of the row.
+   * @param string $source_lang
+   *   The langcode of the row.
    *
    * @return array
    *   Operation links' render array.
@@ -140,11 +140,11 @@ class TranslationOperationsField extends EntityOperations {
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getOperations(ContentEntityInterface $entity, $row_lang) {
+  protected function getOperations(ContentEntityInterface $entity, $source_lang) {
     $links   = [];
-    $current = $this->getTargetLanguage()
+    $target_lang = $this->getTargetLanguage()
       ? $this->getTargetLanguage()
-      : $row_lang;
+      : $source_lang;
 
     /* @var \Drupal\content_translation\ContentTranslationHandlerInterface $handler */
     $handler = $this->getEntityManager()
@@ -156,14 +156,14 @@ class TranslationOperationsField extends EntityOperations {
     $entity_info = new HelperEntityInfo(
       $entity,
       $handler,
-      $this->languageManager->getLanguage($current),
-      $this->languageManager->getLanguage($row_lang)
+      $this->languageManager->getLanguage($target_lang),
+      $this->languageManager->getLanguage($source_lang)
     );
 
     $is_default = static::isDefaultTranslation($entity_info);
 
     // Build edit & delete link.
-    if (array_key_exists($current, $entity_info->translations)) {
+    if (array_key_exists($target_lang, $entity_info->translations)) {
       // If the user is allowed to edit the entity we point the edit link to
       // the entity form, otherwise if we are not dealing with the original
       // language we point the link to the translation form.
@@ -192,7 +192,7 @@ class TranslationOperationsField extends EntityOperations {
         $links += $this->buildDeleteLink($entity_info, 'translation');
       }
     }
-    // Check if there are pending revisions
+    // Check if there are pending revisions.
     elseif ($this->pendingRevisionExist($entity_info)) {
       // If the user is allowed to edit the entity we point the edit link to
       // the entity form, otherwise if we are not dealing with the original
@@ -210,7 +210,7 @@ class TranslationOperationsField extends EntityOperations {
       }
     }
     // Build add link.
-    elseif (!empty($current)
+    elseif (!empty($target_lang)
       && $entity_info->translatable
       && $entity_info->getTranslationAccess('create')
     ) {
@@ -239,7 +239,7 @@ class TranslationOperationsField extends EntityOperations {
   }
 
   /**
-   * Check if current translation is the default translation.
+   * Check if target translation is the default translation.
    *
    * @param \Drupal\translation_views\EntityInfo $entity_info
    *   Entity info object.
@@ -248,16 +248,16 @@ class TranslationOperationsField extends EntityOperations {
    *   Checking result.
    */
   protected static function isDefaultTranslation(HelperEntityInfo $entity_info) {
-    $source_langcode = $entity_info->entity
+    $source_lang = $entity_info->entity
       ->getUntranslated()
       ->language()
       ->getId();
-    $current_langcode = $entity_info->currentLanguage->getId();
-    return $source_langcode === $current_langcode;
+    $target_lang = $entity_info->targetLanguage->getId();
+    return $source_lang === $target_lang;
   }
 
   /**
-   * Check if pending revision exist for this translation
+   * Check if pending revision exist for this translation.
    *
    * @param \Drupal\translation_views\EntityInfo $entity_info
    *   Entity info object.
@@ -276,7 +276,7 @@ class TranslationOperationsField extends EntityOperations {
       $entity  = $storage->load($entity_info->entity->id());
       $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId(
         $entity->id(),
-        $entity_info->currentLanguage->getId()
+        $entity_info->targetLanguage->getId()
       );
       if ($translation_has_revision) {
         return TRUE;
@@ -294,12 +294,12 @@ class TranslationOperationsField extends EntityOperations {
     $add_url = new Url(
       "entity.{$entity_info->entityTypeId}.content_translation_add",
       [
-        'source' => $entity_info->rowLanguage->getId(),
-        'target' => $entity_info->currentLanguage->getId(),
+        'source' => $entity_info->sourceLanguage->getId(),
+        'target' => $entity_info->targetLanguage->getId(),
         $entity_info->entityTypeId => $entity_info->entity->id(),
       ],
       [
-        'language' => $entity_info->currentLanguage,
+        'language' => $entity_info->targetLanguage,
       ]
     );
 
@@ -324,7 +324,7 @@ class TranslationOperationsField extends EntityOperations {
       $links['delete'] = [
         'title'    => $this->t('Delete'),
         'url'      => $entity_info->entity->urlInfo('delete-form'),
-        'language' => $entity_info->currentLanguage,
+        'language' => $entity_info->targetLanguage,
       ];
     }
     elseif ($type == 'translation') {
@@ -333,11 +333,11 @@ class TranslationOperationsField extends EntityOperations {
         'url'   => new Url(
           "entity.{$entity_info->entityTypeId}.content_translation_delete",
           [
-            'language' => $entity_info->currentLanguage->getId(),
+            'language' => $entity_info->targetLanguage->getId(),
             $entity_info->entityTypeId => $entity_info->entity->id(),
           ],
           [
-            'language' => $entity_info->currentLanguage,
+            'language' => $entity_info->targetLanguage,
           ]
         ),
       ];
@@ -355,17 +355,17 @@ class TranslationOperationsField extends EntityOperations {
 
     if ($type == 'entity') {
       $links['edit']['url'] = $entity_info->entity->toUrl('edit-form');
-      $links['edit']['language'] = $entity_info->currentLanguage;
+      $links['edit']['language'] = $entity_info->targetLanguage;
     }
     elseif ($type == 'translation') {
       $links['edit']['url'] = new Url(
         "entity.{$entity_info->entityTypeId}.content_translation_edit",
         [
-          'language' => $entity_info->currentLanguage->getId(),
+          'language' => $entity_info->targetLanguage->getId(),
           $entity_info->entityTypeId => $entity_info->entity->id(),
         ],
         [
-          'language' => $entity_info->currentLanguage,
+          'language' => $entity_info->targetLanguage,
         ]
       );
       ;

@@ -171,7 +171,6 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $user_input = $form_state->getUserInput();
 
       // We need set exposed input when there is no selected value by user yet.
-
       if ($exposed) {
         if (!isset($this->options['limit'])) {
           $this->options['limit'] = FALSE;

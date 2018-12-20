@@ -68,7 +68,7 @@ class TranslationCountField extends NumericField implements ContainerFactoryPlug
   }
 
   /**
-   * Provide option to include original language in count
+   * Provide option to include original language in count.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['include_original_language'] = [

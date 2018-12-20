@@ -3,7 +3,7 @@ Translation Views
 
 INTRODUCTION
 ------------
-Provides fields and filter for views to display information about the current row, the **source** translation, in another **target** language. You can also add translation operation links to decide if you want to add/edit the content in the target language.
+Provides fields and filter for views to display information about each row, the **source** translation, in another **target** language. You can also add translation operation links to decide if you want to add/edit the content in the target language.
 
 Configurations for a demo view is imported on installation, named `Content translation jobs` which can be found at path `/translate/content`. If you want to get view for other translatable entities, you should build it yourself using our fields/filters.
 
@@ -17,12 +17,12 @@ FEATURES
 - Target language: `field`,`filter`. Should in most cases be an exposed filter.
   Also, there is an extra filter option: *Remove rows where source language is equal to target language*
 
-These fields/filters will display information about the current content in the selected target language:
+These fields/filters will display information about the each row in the selected target language:
 - Translation outdated: `field`,`filter`
 - Translation status: `field`,`filter`
 - Target language equals default language: `field`,`filter`: Checks if the target language is the same as the original language of the node.
 - Translation changed time: `field`
-- Translation source equals row language: `field`,`filter`: Checks if the source translation of the target language is the same as the language of the row
+- Source translation of target language equals row language: `field`,`filter`: Checks if the source translation of the row is the same as the target language
 - Translation operations: `field`
 - Translation moderation state: `field`
 

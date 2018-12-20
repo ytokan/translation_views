@@ -23,40 +23,58 @@ class EntityInfo {
    * @var \Drupal\Core\Entity\ContentEntityInterface
    */
   public $entity;
-
   /**
    * The entity type id.
    *
    * @var string
    */
   public $entityTypeId;
-
   /**
    * Entity type instance.
    *
    * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   public $entityType;
-
+  /**
+   * Entity translation languages.
+   *
+   * @var \Drupal\Core\Language\LanguageInterface[]
+   */
   public $translations;
-
+  /**
+   * Entity is translatable flag.
+   *
+   * @var bool
+   */
   public $translatable;
-
-  public $rowLanguage;
-
+  /**
+   * Access handler.
+   *
+   * @var \Drupal\content_translation\ContentTranslationHandlerInterface
+   */
   public $access;
-
-  public $currentLanguage;
+  /**
+   * Source language object.
+   *
+   * @var \Drupal\Core\Language\LanguageInterface
+   */
+  public $sourceLanguage;
+  /**
+   * Target language object.
+   *
+   * @var \Drupal\Core\Language\LanguageInterface
+   */
+  public $targetLanguage;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(ContentEntityInterface $entity, ContentTranslationHandlerInterface $access, LanguageInterface $language, LanguageInterface $row_lang) {
+  public function __construct(ContentEntityInterface $entity, ContentTranslationHandlerInterface $access, LanguageInterface $target_lang, LanguageInterface $source_lang) {
     $this->entity = $entity;
     $this->access = $access;
 
-    $this->rowLanguage = $row_lang;
-    $this->currentLanguage = $language;
+    $this->sourceLanguage = $source_lang;
+    $this->targetLanguage = $target_lang;
 
     $this->entityTypeId = $entity->getEntityTypeId();
     $this->entityType   = $entity->getEntityType();
@@ -65,7 +83,7 @@ class EntityInfo {
   }
 
   /**
-   * An wrapper to get translation access by particular entity per operation.
+   * A wrapper for getting translation access per operation.
    *
    * @see \Drupal\content_translation\ContentTranslationHandlerInterface::getTranslationAccess,
    * for available operations.

@@ -53,7 +53,6 @@ class ContentModerationIntegration extends ViewTestBase {
     // Flush definitions caches.
     \Drupal::entityTypeManager()->clearCachedDefinitions();
 
-
     // Enable moderation state for article nodes.
     $workflow = Workflow::load('editorial');
     $workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'article');
