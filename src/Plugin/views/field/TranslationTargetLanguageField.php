@@ -57,13 +57,13 @@ class TranslationTargetLanguageField extends LanguageField implements ContainerF
    * instead from ResultRow.
    */
   public function render(ResultRow $values) {
-    $target_lang = $this->getTargetLanguage();
+    $target_langcode = $this->getTargetLangcode();
 
     $languages = $this->options['native_language']
       ? $this->languageManager->getNativeLanguages()
       : $this->languageManager->getLanguages();
 
-    $build['#markup'] = $languages[$target_lang]->getName();
+    $build['#markup'] = $languages[$target_langcode]->getName();
     $build['#cache']['contexts'][] = 'url.query_args:' . self::$targetExposedKey;
 
     return $build;

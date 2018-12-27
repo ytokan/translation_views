@@ -29,7 +29,7 @@ class TranslationLanguageJoin extends JoinPluginBase implements ContainerFactory
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->database = $database;
-    $this->eid = $this->configuration['entity_pk'];
+    $this->eid = $this->configuration['entity_id'];
   }
 
   /**

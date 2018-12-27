@@ -7,24 +7,23 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 
 /**
- * Class EntityInfo.
+ * Class EntityTranslationInfo.
  *
- * Special object to store common entity related properties,
- * it will be used by all operations link builder functions,
- * just as "trait" but for method's values.
+ * Stores entity translation related propertie used by
+ * operations link builder functions as a trait.
  *
  * @package Drupal\translation_views
  */
-class EntityInfo {
+class EntityTranslationInfo {
 
   /**
-   * Source entity.
+   * Entity.
    *
    * @var \Drupal\Core\Entity\ContentEntityInterface
    */
   public $entity;
   /**
-   * The entity type id.
+   * Entity type id.
    *
    * @var string
    */
@@ -36,31 +35,19 @@ class EntityInfo {
    */
   public $entityType;
   /**
-   * Entity translation languages.
-   *
-   * @var \Drupal\Core\Language\LanguageInterface[]
-   */
-  public $translations;
-  /**
-   * Entity is translatable flag.
-   *
-   * @var bool
-   */
-  public $translatable;
-  /**
-   * Access handler.
+   * Translation access handler.
    *
    * @var \Drupal\content_translation\ContentTranslationHandlerInterface
    */
-  public $access;
+  public $accessHandler;
   /**
-   * Source language object.
+   * Source language.
    *
    * @var \Drupal\Core\Language\LanguageInterface
    */
   public $sourceLanguage;
   /**
-   * Target language object.
+   * Target language.
    *
    * @var \Drupal\Core\Language\LanguageInterface
    */
@@ -69,17 +56,15 @@ class EntityInfo {
   /**
    * {@inheritdoc}
    */
-  public function __construct(ContentEntityInterface $entity, ContentTranslationHandlerInterface $access, LanguageInterface $target_lang, LanguageInterface $source_lang) {
+  public function __construct(ContentEntityInterface $entity, ContentTranslationHandlerInterface $accessHandler, LanguageInterface $targetLanguage, LanguageInterface $sourceLanguage) {
     $this->entity = $entity;
-    $this->access = $access;
+    $this->accessHandler = $accessHandler;
 
-    $this->sourceLanguage = $source_lang;
-    $this->targetLanguage = $target_lang;
+    $this->sourceLanguage = $sourceLanguage;
+    $this->targetLanguage = $targetLanguage;
 
     $this->entityTypeId = $entity->getEntityTypeId();
     $this->entityType   = $entity->getEntityType();
-    $this->translations = $entity->getTranslationLanguages();
-    $this->translatable = $entity->isTranslatable();
   }
 
   /**
@@ -88,8 +73,8 @@ class EntityInfo {
    * @see \Drupal\content_translation\ContentTranslationHandlerInterface::getTranslationAccess,
    * for available operations.
    */
-  public function getTranslationAccess($op) {
-    $access = $this->access->getTranslationAccess($this->entity, $op);
+  public function getTranslationAccess($operation) {
+    $access = $this->accessHandler->getTranslationAccess($this->entity, $operation);
     return $access->isAllowed();
   }
 

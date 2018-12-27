@@ -28,21 +28,21 @@ class TranslationStatusFilter extends BooleanOperator {
     $status = $this->value;
 
     if ($status == 0) {
-      $op = '=';
+      $operation = '=';
     }
     // Then status translated is the case.
     else {
       // Mysql FIND_IN_SET func will return position of element,
       // when no element was found then it returns 0,
       // so we use "> 0" as condition to filter out untranslated rows.
-      $op = '>';
+      $operation = '>';
       $status = 0;
     }
 
     /* @var \Drupal\views\Plugin\views\query\Sql */
     $this->query->addWhereExpression(
       $this->options['group'],
-      "FIND_IN_SET(:langcode, $table_alias.langs) $op :status", [
+      "FIND_IN_SET(:langcode, $table_alias.langs) $operation :status", [
         ':langcode' => '***TRANSLATION_VIEWS_TARGET_LANG***',
         ':status' => $status,
       ]

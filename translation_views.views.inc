@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provide views extra filters/fields for translator needs.
+ * Provide views fields/filters for content translations.
  *
  * @ingroup views_module_handlers
  */
@@ -50,7 +50,7 @@ function translation_views_views_data_alter(array &$data) {
         $translations_table =& $data[$key];
         $translations_table_target =& $data[$target_key];
 
-        $pk = $entity_type->getKey('id');
+        $entity_id = $entity_type->getKey('id');
 
         $translations_table['table'] = [
           'group'       => $group,
@@ -58,10 +58,10 @@ function translation_views_views_data_alter(array &$data) {
           'join'        => [
             $field_data_table => [
               'join_id'    => 'translation_views_language_join',
-              'entity_pk'  => $pk,
+              'entity_id'  => $entity_id,
               'type'       => 'LEFT',
-              'left_field' => $pk,
-              'field'      => $pk,
+              'left_field' => $entity_id,
+              'field'      => $entity_id,
               'table'      => $field_data_table,
             ],
           ],
@@ -81,8 +81,8 @@ function translation_views_views_data_alter(array &$data) {
           'join'  => [
             $field_data_table => [
               'type'       => 'LEFT',
-              'left_field' => $pk,
-              'field'      => $pk,
+              'left_field' => $entity_id,
+              'field'      => $entity_id,
               'table'      => $field_data_table,
               'extra'      => [
                 [

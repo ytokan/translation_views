@@ -36,7 +36,7 @@ trait TranslationCountTrait {
         'left_table' => $query_base_table,
         'include_original_language' => !empty($this->options['include_original_language']),
         'langcodes_as_count' => TRUE,
-        'entity_pk'  => $keys['id'],
+        'entity_id'  => $keys['id'],
       ];
 
       $tableAlias = $query->ensureTable($query_base_table, $this->relationship);

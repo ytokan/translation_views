@@ -33,7 +33,7 @@ trait TranslationViewsTargetLanguage {
    * @return string
    *   The selected target langcode.
    */
-  protected function getTargetLanguage() {
+  protected function getTargetLangcode() {
     $inputs   = $this->view->getExposedInput();
     $langcode = isset($inputs[self::$targetExposedKey])
       ? $inputs[self::$targetExposedKey]

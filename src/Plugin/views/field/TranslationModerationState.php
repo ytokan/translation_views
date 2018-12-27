@@ -122,22 +122,22 @@ class TranslationModerationState extends FieldPluginBase {
   public function render(ResultRow $values) {
     if ($values->_entity->id()) {
       /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-      $entity_type              = $values->_entity->getEntityTypeId();
-      $storage                  = $this->entityTypeManager->getStorage($entity_type);
+      $entityTypeId              = $values->_entity->getEntityTypeId();
+      $storage                  = $this->entityTypeManager->getStorage($entityTypeId);
       $entity                   = $storage->load($values->_entity->id());
-      $target_lang              = $this->getTargetLanguage();
-      $pending_revision_enabled = ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type);
+      $target_langcode          = $this->getTargetLangcode();
+      $pending_revision_enabled = ContentTranslationManager::isPendingRevisionSupportEnabled($entityTypeId);
 
-      if (empty($target_lang) || $target_lang == '***LANGUAGE_site_default***') {
-        $target_lang = $this->languageManager->getCurrentLanguage()->getId();
+      if (empty($target_langcode) || $target_langcode == '***LANGUAGE_site_default***') {
+        $target_langcode = $this->languageManager->getCurrentLanguage()->getId();
       }
 
-      $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId($values->_entity->id(), $target_lang);
-      if ($entity && $pending_revision_enabled && $target_lang && $translation_has_revision) {
+      $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId($values->_entity->id(), $target_langcode);
+      if ($entity && $pending_revision_enabled && $target_langcode && $translation_has_revision) {
         $latest_revision = $storage->loadRevision($translation_has_revision);
-        if ($entity && $latest_revision->hasTranslation($target_lang)) {
+        if ($entity && $latest_revision->hasTranslation($target_langcode)) {
           $workflow          = $this->moderationInfo->getWorkflowForEntity($latest_revision);
-          $translation       = $latest_revision->getTranslation($target_lang);
+          $translation       = $latest_revision->getTranslation($target_langcode);
           $translation_state = $translation->moderation_state->value;
 
           if (!empty($this->options['display_name']) && $workflow !== NULL) {

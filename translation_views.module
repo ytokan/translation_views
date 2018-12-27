@@ -42,12 +42,12 @@ function translation_views_form_alter(&$form, FormStateInterface $form_state) {
   }
 
   $entity = $form_object->getEntity();
-  $op = $form_object->getOperation();
+  $operations = $form_object->getOperation();
 
   if ($entity instanceof ContentEntityInterface
     && $entity->isTranslatable()
     && count($entity->getTranslationLanguages()) > 1
-    && in_array($op, ['edit', 'add', 'default'], TRUE)
+    && in_array($operations, ['edit', 'add', 'default'], TRUE)
   ) {
     $form['source_langcode']['submit']['#submit'][] = 'translation_views_content_form_fix_destination';
   }
