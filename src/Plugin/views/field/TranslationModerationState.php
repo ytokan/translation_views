@@ -122,7 +122,7 @@ class TranslationModerationState extends FieldPluginBase {
   public function render(ResultRow $values) {
     if ($values->_entity->id()) {
       /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-      $entityTypeId              = $values->_entity->getEntityTypeId();
+      $entityTypeId             = $values->_entity->getEntityTypeId();
       $storage                  = $this->entityTypeManager->getStorage($entityTypeId);
       $entity                   = $storage->load($values->_entity->id());
       $target_langcode          = $this->getTargetLangcode();

@@ -67,7 +67,7 @@ function translation_views_content_form_fix_destination($form, FormStateInterfac
   $options     = [];
 
   // Remove destination parameter from request,
-  // to allow "Change" button works like desired
+  // to allow "Change" button works like desired.
   if ($query->has('destination')) {
     $options['query']['destination'] = $query->get('destination');
     $query->remove('destination');

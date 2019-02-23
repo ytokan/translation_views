@@ -142,7 +142,7 @@ class TranslationOperationsField extends EntityOperations {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getTranslationOperations(ContentEntityInterface $entity, $source_langcode) {
-    $links   = [];
+    $links           = [];
     $target_langcode = $this->getTargetLangcode()
       ? $this->getTargetLangcode()
       : $source_langcode;
@@ -242,7 +242,7 @@ class TranslationOperationsField extends EntityOperations {
   /**
    * Check if target translation is the default translation.
    *
-   * @param \Drupal\translation_views\EntityInfo $translation_info
+   * @param \Drupal\translation_views\EntityTranslationInfo $translation_info
    *   Entity info object.
    *
    * @return bool
@@ -260,7 +260,7 @@ class TranslationOperationsField extends EntityOperations {
   /**
    * Check if pending revision exist for this translation.
    *
-   * @param \Drupal\translation_views\EntityInfo $translation_info
+   * @param \Drupal\translation_views\EntityTranslationInfo $translation_info
    *   Entity info object.
    *
    * @return bool
