@@ -8,14 +8,14 @@ use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Class LocalTranslationContentIntegrationTest.
+ * Class TranslatorsContentIntegrationTest.
  *
  * @package Drupal\Tests\translation_views\Functional
  *
  * @group translation_views
- * @requires module local_translation
+ * @requires module translators
  */
-class LocalTranslationContentIntegrationTest extends BrowserTestBase {
+class TranslatorsContentIntegrationTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -25,14 +25,14 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['translation_views_local_translation_test'];
+  public static $modules = ['translation_views_translators_test'];
 
   /**
-   * Local translation skills service.
+   * Translators skills service.
    *
-   * @var \Drupal\local_translation\Services\LocalTranslationUserSkills
+   * @var \Drupal\translators\Services\TranslatorSkills
    */
-  protected $skills;
+  protected $translatorSkills;
   /**
    * User registered skills.
    *
@@ -65,7 +65,7 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
    */
   protected function setUpTest() {
     $this->drupalLogin($this->rootUser);
-    $this->skills = $this->container->get('local_translation.user_skills');
+    $this->translatorSkills = $this->container->get('translators.skills');
     $this->createLanguages();
     $this->enableTranslation('node', 'article');
     $this->drupalLogout();
@@ -104,9 +104,9 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function registerTestSkills() {
-    $this->skills->addSkill(static::$registeredSkills);
+    $this->translatorSkills->addSkill(static::$registeredSkills);
     foreach (static::$registeredSkills as $skill) {
-      $this->assertTrue($this->skills->userHasSkill($skill));
+      $this->assertTrue($this->translatorSkills->hasSkill($skill));
     }
   }
 
@@ -132,16 +132,16 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
    */
   public function testDependencyInstallation() {
     $this->assertTrue($this->container->get('module_handler')
-      ->moduleExists('local_translation'));
+      ->moduleExists('translators'));
     $this->assertTrue($this->container->get('module_handler')
-      ->moduleExists('local_translation_content'));
-    $this->assertTrue($this->container->has('local_translation.user_skills'));
+      ->moduleExists('translators_content'));
+    $this->assertTrue($this->container->has('translators.skills'));
   }
 
   /**
-   * Test local translation content integration for target language filter.
+   * Test Content Translators integration for target language filter.
    */
-  public function testLocalTranslationLanguageFilterInView() {
+  public function testTranslatorsLanguageFilterInView() {
     $this->drupalLogin($this->rootUser);
     $this->registerTestSkills();
     for ($i = 1; $i <= 10; $i++) {
@@ -154,7 +154,7 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
         ->save();
     }
 
-    $this->drupalGet('/test-local-translation-content-filter');
+    $this->drupalGet('/test-translators-content-filter');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->statusCodeNotEquals(404);
 
@@ -179,20 +179,20 @@ class LocalTranslationContentIntegrationTest extends BrowserTestBase {
     $this->assertContains('de', $language_options);
     $this->assertContains('sq', $language_options);
 
-    $this->drupalGet('/admin/structure/views/nojs/handler/test_local_translation_content_integration/page_1/filter/translation_target_language');
+    $this->drupalGet('/admin/structure/views/nojs/handler/test_translators_content_integration/page_1/filter/translation_target_language');
     // Check for the default state of the options.
     $this->assertSession()->checkboxNotChecked('options[limit]');
-    $this->assertSession()->checkboxNotChecked('options[column][from]');
-    $this->assertSession()->checkboxChecked('options[column][to]');
+    $this->assertSession()->checkboxNotChecked('options[column][source]');
+    $this->assertSession()->checkboxChecked('options[column][target]');
     // Update options.
     $this->drupalPostForm(NULL, [
       'options[limit]'        => 1,
-      'options[column][from]' => 1,
-      'options[column][to]'   => 1,
+      'options[column][source]' => 1,
+      'options[column][target]'   => 1,
     ], 'Apply');
     $this->click('input[value="Save"]');
 
-    $this->drupalGet('/test-local-translation-content-filter');
+    $this->drupalGet('/test-translators-content-filter');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->statusCodeNotEquals(404);
 

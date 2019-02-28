@@ -70,7 +70,7 @@ Hidden filters
 
 MODULE INTEGRATION
 -------------
-You can limit the target language filter list to the users registered translation skill if you're using [Local Translation](https://www.drupal.org/project/local_translation)
+You can limit the target language filter list to the users registered translation skill if you're using [Translators](https://www.drupal.org/project/translators)
 
 MAINTAINERS
 -----------

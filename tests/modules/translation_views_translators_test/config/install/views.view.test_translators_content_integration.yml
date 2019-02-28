@@ -7,8 +7,8 @@ dependencies:
   - node
   - translation_views
   - user
-id: test_local_translation_content_integration
-label: 'Test local translation content integration'
+id: test_translators_content_integration
+label: 'Test Translators content integration'
 module: views
 description: ''
 tag: ''
@@ -218,7 +218,7 @@ display:
           entity_type: node
           plugin_id: translation_views_target_language
       sorts: {  }
-      title: 'Test local translation content filter'
+      title: 'Test Translators content filter'
       header: {  }
       footer: {  }
       empty: {  }
@@ -241,7 +241,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: test-local-translation-content-filter
+      path: test-translators-content-filter
     cache_metadata:
       max-age: -1
       contexts:

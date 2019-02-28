@@ -23,17 +23,17 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   use TargetLanguage;
 
   /**
-   * Flag about module 'local_translation_content' existence.
+   * Flag about module 'translators_content' existence.
    *
    * @var bool
    */
-  protected $localTranslation = FALSE;
+  protected $translators_content = FALSE;
   /**
-   * Local Translation skills service.
+   * Translators skills service.
    *
-   * @var \Drupal\local_translation\Services\LocalTranslationUserSkills|null
+   * @var \Drupal\translators\Services\TranslatorsSkills|null
    */
-  protected $skills = NULL;
+  protected $translatorSkills = NULL;
 
   /**
    * {@inheritdoc}
@@ -52,9 +52,9 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   public function __construct(array $configuration, $plugin_id, $plugin_definition, LanguageManagerInterface $language_manager, ModuleHandlerInterface $handler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->languageManager = $language_manager;
-    $this->localTranslation = $handler->moduleExists('local_translation_content');
-    if ($this->localTranslation && \Drupal::hasService('local_translation.user_skills')) {
-      $this->skills = \Drupal::service('local_translation.user_skills');
+    $this->translators_content = $handler->moduleExists('translators_content');
+    if ($this->translators_content && \Drupal::hasService('translators.skills')) {
+      $this->translatorSkills = \Drupal::service('translators.skills');
     }
   }
 
@@ -67,7 +67,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
     unset($form['expose']['multiple']);
     unset($form['expose']['required']);
 
-    if ($this->localTranslation) {
+    if ($this->translators_content) {
       // We need to force this option to allow users to use only the languages,
       // specified as the user's translation skills.
       $form['expose']['reduce']['#default_value'] = TRUE;
@@ -98,9 +98,9 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
     $options['remove']['default'] = TRUE;
     $options['exposed']['default'] = TRUE;
 
-    if ($this->localTranslation) {
+    if ($this->translators_content) {
       $options['limit'] = ['default' => FALSE];
-      $options['column'] = ['default' => ['from' => '', 'to' => 'to']];
+      $options['column'] = ['default' => ['source' => '', 'target' => 'target']];
     }
 
     return $options;
@@ -109,9 +109,25 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   /**
    * {@inheritdoc}
    */
+  public function buildExposedForm(&$form, FormStateInterface $form_state) {
+    parent::buildExposedForm($form, $form_state);
+    $field =& $form[$this->field];
+    // Show empty registered skills message inside this window.
+    if ($this->translators_content
+      && $this->options['limit']
+      && empty($this->translatorSkills->getSkills(NULL, TRUE))) {
+        $field['#options'] = ['All' => $this->t('- Any -')];
+        $field['#value'] = $field['#default_value'] = 'All';
+        $this->translatorSkills->showEmptyMessage();
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
-    if ($this->localTranslation) {
+    if ($this->translators_content) {
       // Remove the values list - we will handle them on a background basis.
       // Only if limited option is checked.
       $form['value']['#states'] = [
@@ -138,10 +154,10 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $form['column'] = [
         '#type'          => 'checkboxes',
         '#options'       => [
-          'from' => $this->t('Source languages'),
-          'to'   => $this->t('Target languages'),
+          'source' => $this->t('Source languages'),
+          'target'   => $this->t('Target languages'),
         ],
-        '#title'         => $this->t('Languages by translation skills'),
+        '#title'         => $this->t('Translation skill'),
         '#required'      => FALSE,
         '#default_value' => $this->options['column'],
         '#states' => [
@@ -222,12 +238,12 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    */
   protected function buildLanguageOptions() {
     $options = [];
-    if ($this->localTranslation && $this->options['limit']) {
-      $skills = $this->skills->getSkills(NULL, TRUE);
+    if ($this->translators_content && $this->options['limit']) {
+      $translators_languages = $this->translatorSkills->getSkills(NULL, TRUE);
       // Handle column options.
       foreach ($this->options['column'] as $name => $column) {
         if (!empty($column)) {
-          foreach ($skills as $langs) {
+          foreach ($translators_languages as $langs) {
             $this->processColumnOption($langs, $name, $options);
           }
         }

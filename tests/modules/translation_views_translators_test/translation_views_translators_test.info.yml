@@ -1,6 +1,6 @@
-name: 'Translation views test view'
+name: 'Translation views Translators integration test'
 type: module
-description: 'Provides full view for translation_views tests.'
+description: ''
 package: Testing
 # core: 8.x
 dependencies:
@@ -9,8 +9,8 @@ dependencies:
   - drupal:translation_views
   - drupal:content_translation
   - drupal:language
-  - drupal:content_moderation
-  - drupal:workflows
+  - translators:translators
+  - translators:translators_content
 
 # Information added by Drupal.org packaging script on 2019-02-07
 version: '8.x-1.0-alpha5'
