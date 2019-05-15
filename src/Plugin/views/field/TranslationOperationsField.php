@@ -324,7 +324,7 @@ class TranslationOperationsField extends EntityOperations {
     if ($type == 'entity') {
       $links['delete'] = [
         'title'    => $this->t('Delete'),
-        'url'      => $translation_info->entity->urlInfo('delete-form'),
+        'url'      => $translation_info->entity->toUrl('delete-form'),
         'language' => $translation_info->targetLanguage,
       ];
     }
