@@ -115,10 +115,10 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
     // Show empty registered skills message inside this window.
     if ($this->translators_content
       && $this->options['limit']
-      && empty($this->translatorSkills->getSkills(NULL, TRUE))) {
+      && empty($this->translatorSkills->getAllLangcodes())) {
         $field['#options'] = ['All' => $this->t('- Any -')];
         $field['#value'] = $field['#default_value'] = 'All';
-        $this->translatorSkills->showEmptyMessage();
+        $this->translatorSkills->showMissingTranslationSkillsWarning();
     }
   }
 
@@ -239,7 +239,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   protected function buildLanguageOptions() {
     $options = [];
     if ($this->translators_content && $this->options['limit']) {
-      $translators_languages = $this->translatorSkills->getSkills(NULL, TRUE);
+      $translators_languages = $this->translatorSkills->getTranslationSkills();
       // Handle column options.
       foreach ($this->options['column'] as $name => $column) {
         if (!empty($column)) {
