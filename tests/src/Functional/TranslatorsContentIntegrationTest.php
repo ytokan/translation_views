@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\translators_content\TranslatorsContentTestsTrait;
 
 /**
  * Class TranslatorsContentIntegrationTest.
@@ -16,6 +17,7 @@ use Drupal\Tests\BrowserTestBase;
  * @requires module translators
  */
 class TranslatorsContentIntegrationTest extends BrowserTestBase {
+  use TranslatorsContentTestsTrait;
 
   /**
    * {@inheritdoc}
@@ -104,9 +106,9 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function registerTestSkills() {
-    $this->translatorSkills->addSkill(static::$registeredSkills);
+    $this->addSkill(static::$registeredSkills);
     foreach (static::$registeredSkills as $skill) {
-      $this->assertTrue($this->translatorSkills->hasSkill($skill));
+      $this->assertTrue($this->translatorSkills->hasLangcode($skill));
     }
   }
 

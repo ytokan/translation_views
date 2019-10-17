@@ -9,3 +9,4 @@ dependencies:
 
 test_dependencies:
   - translators:translators
+  - translators:translators_content
