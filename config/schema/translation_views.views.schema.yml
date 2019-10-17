@@ -26,17 +26,17 @@ views.filter.translation_views_target_language:
       label: 'Remove rows where source language is equal to target language'
     limit:
       type: boolean
-      label: 'Enable limiting languages list using Local Translation module'
+      label: 'Enable limiting languages list using Translators module'
     column:
       type: mapping
       label: 'Column'
       mapping:
-        from:
+        source:
           type: string
-          lable: 'Source language'
-        to:
+          lable: 'Source languages'
+        target:
           type: string
-          lable: 'Target language'
+          lable: 'Target languages'
 
 views.field.translation_views_translation_count:
   type: views.field.numeric

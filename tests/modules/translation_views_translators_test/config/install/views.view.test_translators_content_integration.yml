@@ -213,8 +213,8 @@ display:
           remove: true
           limit: false
           column:
-            from: ''
-            to: 'to'
+            source: ''
+            target: 'target'
           entity_type: node
           plugin_id: translation_views_target_language
       sorts: {  }
