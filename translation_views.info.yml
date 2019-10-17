@@ -8,4 +8,4 @@ dependencies:
   - drupal:views
 
 test_dependencies:
-  - local_translation:local_translation
+  - translators:translators
