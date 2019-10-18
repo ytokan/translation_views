@@ -138,7 +138,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       // Build values list independently in order to see all the options,
       // while switching "limit" option without necessity to reload the form.
       $form['value']['#options'] = $this->listLanguages(
-        LanguageInterface::STATE_ALL
+        LanguageInterface::STATE_CONFIGURABLE
         | LanguageInterface::STATE_SITE_DEFAULT
         | PluginBase::INCLUDE_NEGOTIATED
       );
