@@ -36,8 +36,8 @@ FEATURES
 **Target translation**
 
  * Target language: `field`,`filter`. Should in most cases be an exposed filter.
-   Also, there is an extra filter option: *Remove rows where source language is
-   equal to the target language
+   Also, there is an extra filter option: *Remove rows where language equals
+   target language
 
 These fields/filters will display information about each row in the selected
 target language:

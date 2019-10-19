@@ -131,6 +131,12 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
+    $form['remove'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Remove rows where language equals target language.'),
+      '#default_value' => $this->options['remove'],
+      '#weight' => -50,
+    ];
     if ($this->translators_content) {
       // Remove the values list - we will handle them on a background basis.
       // Only if limited option is checked.
@@ -224,15 +230,6 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       '#type' => 'hidden',
       '#value' => static::$targetExposedKey,
     ];
-
-    if (!$exposed) {
-      $form['remove'] = [
-        '#type' => 'checkbox',
-        '#title' => $this->t('Remove rows where source language is equal to target language.'),
-        '#default_value' => $this->options['remove'],
-        '#weight' => -50,
-      ];
-    }
   }
 
   /**
