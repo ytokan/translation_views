@@ -112,6 +112,10 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   public function buildExposedForm(&$form, FormStateInterface $form_state) {
     parent::buildExposedForm($form, $form_state);
     $field =& $form[$this->field];
+    // Avoide validation error when list of allowed languages changes.
+    if (isset($field['#value']) && !isset($field['#options'][$field['#value']])) {
+      $field['#value'] = $field['#default_value'] = '';
+    }
     // Show empty registered skills message inside this window.
     if ($this->translators_content
       && $this->options['limit']
