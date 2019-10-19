@@ -176,7 +176,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     }, $options);
 
     $this->assertCount(4, $language_options);
-    $this->assertContains('***LANGUAGE_site_default***', $language_options);
+    $this->assertContains('en', $language_options);
     $this->assertContains('fr', $language_options);
     $this->assertContains('de', $language_options);
     $this->assertContains('sq', $language_options);

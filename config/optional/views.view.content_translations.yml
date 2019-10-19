@@ -600,7 +600,7 @@ display:
           group_type: group
           admin_label: ''
           operator: '='
-          value: ''
+          value: '***LANGUAGE_site_default***'
           group: 1
           exposed: true
           expose:

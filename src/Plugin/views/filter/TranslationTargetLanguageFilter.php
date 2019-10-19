@@ -187,31 +187,35 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   protected function valueForm(&$form, FormStateInterface $form_state) {
     parent::valueForm($form, $form_state);
 
-    $exposed = $form_state->get('exposed');
-
-    $language_options = $this->buildLanguageOptions();
-    $default_langcode = $this->languageManager->getDefaultLanguage()->getId();
-
     if (!empty($this->options['exposed'])) {
+      $language_options = $this->buildLanguageOptions();
       $identifier = $this->options['expose']['identifier'];
       $user_input = $form_state->getUserInput();
-
-      // We need set exposed input when there is no selected value by user yet.
-      if ($exposed) {
-        if (!isset($this->options['limit'])) {
-          $this->options['limit'] = FALSE;
-        }
-        if (!$this->options['limit']) {
-          if (!isset($user_input[$identifier])
-            || (isset($user_input[$identifier]) && $user_input[$identifier] === $default_langcode)
-          ) {
-            $this->setExposedValue($identifier, PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT, $form_state);
+      $target_langcode = isset($user_input[$identifier]) ? $user_input[$identifier] : $this->value;
+      if (isset($target_langcode)) {
+        if ($target_langcode === '***LANGUAGE_site_default***') {
+          $default_site_langcode = $this->languageManager->getDefaultLanguage()->getId();
+          if (isset($language_options[$default_site_langcode])) {
+            $this->setExposedValue($identifier, $default_site_langcode, $form_state);
+            $this->value = $default_site_langcode;
           }
         }
-        elseif (isset($user_input[$identifier]) && !isset($language_options[$user_input[$identifier]])) {
+        elseif ($target_langcode === '***LANGUAGE_language_interface***') {
+          $interface_langcode = $this->languageManager->getCurrentLanguage()->getId();
+          if (isset($language_options[$interface_langcode])) {
+            $this->setExposedValue($identifier, $interface_langcode, $form_state);
+            $this->value = $interface_langcode;
+          }
+        }
+        elseif (!isset($language_options[$target_langcode])) {
           $this->setExposedValue($identifier, array_keys($language_options)[0], $form_state);
           $this->value = array_keys($language_options)[0];
         }
+      }
+      else {
+        // We need set exposed input when there is no selected value by user yet.
+        $this->setExposedValue($identifier, array_keys($language_options)[0], $form_state);
+        $this->value = array_keys($language_options)[0];
       }
     }
 
@@ -249,15 +253,11 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
           }
         }
       }
-      return $options;
     }
-    $site_default = $this->languageManager->getDefaultLanguage();
-    $options = $this->listLanguages(LanguageInterface::STATE_CONFIGURABLE);
-
-    if (isset($options[$site_default->getId()])) {
-      unset($options[$site_default->getId()]);
+    else {
+      $options = $this->listLanguages(LanguageInterface::STATE_CONFIGURABLE);
     }
-    return [PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT => $site_default->getName()] + $options;
+    return $options;
   }
 
   /**
