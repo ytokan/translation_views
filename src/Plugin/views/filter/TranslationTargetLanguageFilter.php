@@ -192,31 +192,9 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $identifier = $this->options['expose']['identifier'];
       $user_input = $form_state->getUserInput();
       $target_langcode = isset($user_input[$identifier]) ? $user_input[$identifier] : $this->value;
-      if (isset($target_langcode)) {
-        if ($target_langcode === '***LANGUAGE_site_default***') {
-          $default_site_langcode = $this->languageManager->getDefaultLanguage()->getId();
-          if (isset($language_options[$default_site_langcode])) {
-            $this->setExposedValue($identifier, $default_site_langcode, $form_state);
-            $this->value = $default_site_langcode;
-          }
-        }
-        elseif ($target_langcode === '***LANGUAGE_language_interface***') {
-          $interface_langcode = $this->languageManager->getCurrentLanguage()->getId();
-          if (isset($language_options[$interface_langcode])) {
-            $this->setExposedValue($identifier, $interface_langcode, $form_state);
-            $this->value = $interface_langcode;
-          }
-        }
-        elseif (!isset($language_options[$target_langcode])) {
-          $this->setExposedValue($identifier, array_keys($language_options)[0], $form_state);
-          $this->value = array_keys($language_options)[0];
-        }
-      }
-      else {
-        // We need set exposed input when there is no selected value by user yet.
-        $this->setExposedValue($identifier, array_keys($language_options)[0], $form_state);
-        $this->value = array_keys($language_options)[0];
-      }
+      $valid_langcode = $this->getValidLangcode($target_langcode, $language_options);
+      $this->setExposedValue($identifier, $valid_langcode, $form_state);
+      $this->value = $valid_langcode;
     }
 
     $this->always_required = TRUE;
@@ -239,7 +217,8 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   /**
    * Provide options for langcode dropdown.
    *
-   * Options are based on configurable languages or site default one.
+   * @return array
+   *   Available options based on configurable languages.
    */
   protected function buildLanguageOptions() {
     $options = [];
@@ -258,6 +237,33 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $options = $this->listLanguages(LanguageInterface::STATE_CONFIGURABLE);
     }
     return $options;
+  }
+
+  /**
+   * Get a valid langcode from language options.
+   *
+   * @param string $target_langcode
+   *   Target language identifier.
+   * @param array $language_options
+   *   Available language options.
+   *
+   * @return string|null
+   *   A valid langcode, or NULL if no valid langcodes exist.
+   */
+  protected function getValidLangcode($target_langcode, array $language_options) {
+    if ($target_langcode === '***LANGUAGE_site_default***') {
+      $target_langcode = $this->languageManager->getDefaultLanguage()->getId();
+    }
+    elseif ($target_langcode === '***LANGUAGE_language_interface***') {
+      $target_langcode = $this->languageManager->getCurrentLanguage()->getId();
+    }
+    if (!isset($language_options[$target_langcode]) && !empty($language_options)) {
+      return array_keys($language_options)[0];
+    }
+    elseif (empty($language_options)) {
+      return NULL;
+    }
+    return $target_langcode;
   }
 
   /**
