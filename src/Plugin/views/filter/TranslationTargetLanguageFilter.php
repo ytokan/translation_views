@@ -64,8 +64,14 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   public function buildExposeForm(&$form, FormStateInterface $form_state) {
     parent::buildExposeForm($form, $form_state);
 
-    unset($form['expose']['multiple']);
-    unset($form['expose']['required']);
+    $form['expose']['multiple'] = [
+      '#type' => 'hidden',
+      '#value' => FALSE,
+    ];
+    $form['expose']['required'] = [
+      '#type' => 'hidden',
+      '#value' => TRUE,
+    ];
 
     if ($this->translators_content) {
       // We need to force this option to allow users to use only the languages,
