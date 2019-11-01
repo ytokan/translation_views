@@ -143,22 +143,13 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       '#default_value' => $this->options['remove'],
       '#weight' => -50,
     ];
+    // Build values list independently in order to see all the options,
+    $form['value']['#options'] = $this->listLanguages(
+      LanguageInterface::STATE_CONFIGURABLE
+      | LanguageInterface::STATE_SITE_DEFAULT
+      | PluginBase::INCLUDE_NEGOTIATED
+    );
     if ($this->translators_content) {
-      // Remove the values list - we will handle them on a background basis.
-      // Only if limited option is checked.
-      $form['value']['#states'] = [
-        'visible' => [
-          'input[name="options[limit]"]' => ['checked' => FALSE],
-        ],
-      ];
-      // Build values list independently in order to see all the options,
-      // while switching "limit" option without necessity to reload the form.
-      $form['value']['#options'] = $this->listLanguages(
-        LanguageInterface::STATE_CONFIGURABLE
-        | LanguageInterface::STATE_SITE_DEFAULT
-        | PluginBase::INCLUDE_NEGOTIATED
-      );
-
       $end = $form['clear_markup_end'];
       unset($form['clear_markup_end']);
       $form['limit'] = [
@@ -200,7 +191,6 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $target_langcode = isset($user_input[$identifier]) ? $user_input[$identifier] : $this->value;
       $valid_langcode = $this->getValidLangcode($target_langcode, $language_options);
       $this->setExposedValue($identifier, $valid_langcode, $form_state);
-      $this->value = $valid_langcode;
     }
 
     $this->always_required = TRUE;
