@@ -311,6 +311,18 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
         '<>'
       );
     }
+
+    if (isset($this->options['limit']) && $this->options['limit']) {
+      $table_alias = $this->ensureMyTable();
+
+      $this->query->addWhereExpression(
+        $this->options['group'],
+        "FIND_IN_SET(:langcode_limit, $table_alias.langs) >= '0' AND :langcode_limit != ''",
+        [
+          ':langcode_limit' => '***TRANSLATION_VIEWS_TARGET_LIMIT_LANG***',
+        ]
+      );
+    }
   }
 
   /**

@@ -19,10 +19,11 @@ function translation_views_views_query_substitutions(ViewExecutable $view) {
     LanguageInterface::STATE_CONFIGURABLE
   ));
 
+  $langcode = $langcode_limit = '';
   if (isset($inputs['translation_target_language'])
     && in_array($inputs['translation_target_language'], $langcodes)
   ) {
-    $langcode = $inputs['translation_target_language'];
+    $langcode = $langcode_limit = $inputs['translation_target_language'];
   }
   else {
     $langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
@@ -30,6 +31,7 @@ function translation_views_views_query_substitutions(ViewExecutable $view) {
 
   $substitutions = [
     '***TRANSLATION_VIEWS_TARGET_LANG***' => $langcode,
+    '***TRANSLATION_VIEWS_TARGET_LIMIT_LANG***' => $langcode_limit,
   ];
 
   return $substitutions;

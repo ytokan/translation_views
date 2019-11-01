@@ -149,10 +149,10 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     for ($i = 1; $i <= 10; $i++) {
       Node::create([
         'type' => 'article',
-        'title' => $this->randomString(),
-        'langcode' => static::$registeredSkills[0],
+        'title' => 'French node ' . $i,
+        'langcode' => 'fr',
       ])
-        ->addTranslation(static::$registeredSkills[1], ['title' => $this->randomString()])
+        ->addTranslation('en', ['title' => 'English translation ' . $i])
         ->save();
     }
 
@@ -218,6 +218,31 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     $this->assertContains('fr', $language_options);
     $this->assertNotContains('de', $language_options);
     $this->assertNotContains('sq', $language_options);
+
+    // Check that view give no result when user have no registered translation skills
+    $this->removeSkills();
+    $this->drupalGet('/test-translators-content-filter');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextNotContains('French node');
+
+    // Find langcode field element.
+    $langcode_field = $this->getSession()
+      ->getPage()
+      ->findField('translation_target_language');
+    $this->assertNotNull($langcode_field);
+
+    // Get all existing options of the langcode filter dropdown.
+    $options = $langcode_field->findAll('xpath', '//option');
+    $this->assertNotNull($options);
+
+    // Prepare array of options' values.
+    $language_options = array_map(function ($option) {
+      return $option->getAttribute('value') ?: $option->getText();
+    }, $options);
+
+    $this->assertCount(1, $language_options);
+    $this->assertContains('All', $language_options);
+
   }
 
 }
