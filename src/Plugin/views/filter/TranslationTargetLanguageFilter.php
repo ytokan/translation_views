@@ -165,7 +165,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
           'target'   => $this->t('Target languages'),
         ],
         '#title'         => $this->t('Translation skill'),
-        '#required'      => FALSE,
+        '#required'      => TRUE,
         '#default_value' => $this->options['column'],
         '#states' => [
           'visible' => [
