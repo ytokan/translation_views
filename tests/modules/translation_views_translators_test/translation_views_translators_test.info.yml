@@ -11,6 +11,7 @@ dependencies:
   - drupal:language
   - translators:translators
   - translators:translators_content
+  - language_combination:language_combination
 
 # Information added by Drupal.org packaging script on 2019-02-07
 version: '8.x-1.0-alpha5'
