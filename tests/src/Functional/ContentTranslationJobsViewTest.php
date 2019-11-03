@@ -199,11 +199,11 @@ class ContentTranslationJobsViewTest extends BrowserTestBase {
       ],
     ]);
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'node1 de');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'German');
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(2)', 'node1 fr');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(2)', 'French');
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(3)', 'node3 fr');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(3)', 'French');
 
     // Check langcode column desc sorting.
     $this->drupalGet('translate/content', [
@@ -213,11 +213,11 @@ class ContentTranslationJobsViewTest extends BrowserTestBase {
       ],
     ]);
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'node1 fr');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(1)', 'French');
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(2)', 'node3 fr');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(2)', 'French');
     $this->assertSession()
-      ->elementTextContains('css', 'table > tbody > tr:nth-child(3)', 'node1 de');
+      ->elementTextContains('css', 'table > tbody > tr:nth-child(3)', 'German');
   }
 
 }
