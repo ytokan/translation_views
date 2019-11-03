@@ -197,7 +197,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
 
     $form['value'] = [
       '#type' => 'select',
-      '#title' => $this->t('Target language'),
+      '#title' => $this->t('Default target language'),
       '#options' => $this->buildLanguageOptions(),
       '#multiple' => FALSE,
       '#required' => TRUE,
