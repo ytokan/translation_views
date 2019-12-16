@@ -6,7 +6,7 @@ use Drupal\Core\Entity\EntityStorageException;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\translators_content\TranslatorsContentTestsTrait;
+use Drupal\Tests\translators_content\Functional\TranslatorsContentTestsTrait;
 
 /**
  * Class TranslatorsContentIntegrationTest.
