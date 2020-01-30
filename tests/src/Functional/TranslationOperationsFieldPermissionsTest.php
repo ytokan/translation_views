@@ -118,27 +118,6 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
   }
 
   /**
-   * Checks that text is in specific row.
-   *
-   * @param int $row_number
-   *   Table row order number.
-   * @param string $css_class
-   *   Part of the css class of required field.
-   * @param string $text
-   *   Text that should be found in the element.
-   *
-   * @throws \Behat\Mink\Exception\ElementTextException
-   */
-  private function assertTextInRow($row_number, $css_class, $text) {
-    $this->assertSession()
-      ->elementTextContains(
-        'css',
-        ".view-content > div:nth-child({$row_number}) .views-field-{$css_class}",
-        $text
-      );
-  }
-
-  /**
    * Change language settings for entity types.
    *
    * @param string $category
@@ -161,7 +140,12 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    * @throws \Behat\Mink\Exception\ExpectationException
    */
   private function goToTestingView() {
-    $this->drupalGet('/test_operations_links');
+    $target_code  = static::$langcodes[mt_rand(0, 4)];
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => $target_code,
+      ],
+    ]);
     $this->assertSession()->statusCodeEquals(200);
   }
 
@@ -256,11 +240,21 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertFalse($this->userUpdate->hasPermission('translate any entity'));
     $this->drupalLogin($this->userUpdate);
     $this->goToTestingView();
-    $this->assertTextInRow(
-      1,
-      'translation-operations ul li a',
-      'Edit'
-    );
+    $this->assertSession()
+      ->elementTextNotContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations",
+        'Edit'
+      );
+    $this->addPermissionsForAuthUser(['translate article node']);
+    $this->assertTrue($this->userUpdate->hasPermission('translate article node'));
+    $this->goToTestingView();
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations ul li a",
+        'Edit'
+      );
   }
 
   /**
@@ -275,11 +269,21 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertFalse($this->userDelete->hasPermission('translate any entity'));
     $this->drupalLogin($this->userDelete);
     $this->goToTestingView();
-    $this->assertTextInRow(
-      1,
-      'translation-operations ul li a',
-      'Delete'
-    );
+    $this->assertSession()
+      ->elementTextNotContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations",
+        'Delete'
+      );
+    $this->addPermissionsForAuthUser(['translate article node']);
+    $this->assertTrue($this->userDelete->hasPermission('translate article node'));
+    $this->goToTestingView();
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations ul li a",
+        'Delete'
+      );
   }
 
 }

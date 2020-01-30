@@ -245,4 +245,92 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
 
   }
 
+  /**
+   * Test Content Translators integration for target language filter.
+   */
+  public function testTranslatorsOperationLinks() {
+    $userTranslatorsLimited = $this->createUser([
+      'translators_content create content translations',
+      'translators_content update content translations',
+      'translators_content delete content translations',
+      'translate any entity',
+      ]);
+    $langcodes = static::getAllTestingLanguages();
+    Node::create([
+      'type' => 'article',
+      'title' => "English node",
+      'langcode' => 'en',
+    ])->save();
+
+    $this->drupalLogin($userTranslatorsLimited);
+    $this->registerTestSkills();
+    // Check Add translation
+    $this->drupalGet('/test-translators-content-filter', [
+      'query' => [
+        'langcode' => 'en',
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations ul li a",
+        'Add'
+      );
+    $this->drupalGet('/test-translators-content-filter', [
+      'query' => [
+        'langcode' => 'en',
+        'translation_target_language' => 'de',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()
+      ->elementTextNotContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations",
+        'Add'
+      );
+    // Check edit Edit and Delete translation
+    Node::load(1)->addTranslation('fr', ['title' => 'French translation '])
+        ->save();
+    $this->drupalGet('/test-translators-content-filter', [
+      'query' => [
+        'langcode' => 'en',
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a",
+        'Edit'
+      );
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a",
+        'Delete'
+      );
+    $this->drupalGet('/test-translators-content-filter', [
+      'query' => [
+        'langcode' => 'en',
+        'translation_target_language' => 'de',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()
+      ->elementTextNotContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations",
+        'Edit'
+      );
+    $this->assertSession()
+      ->elementTextNotContains(
+        'css',
+        "table > tbody > tr:nth-child(1) .views-field-translation-operations",
+        'Delete'
+      );
+  }
 }

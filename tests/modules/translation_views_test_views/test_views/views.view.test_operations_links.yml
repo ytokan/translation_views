@@ -208,6 +208,69 @@ display:
           entity_type: node
           entity_field: type
           plugin_id: bundle
+          expose:
+            operator: ''
+            operator_limit_selection: false
+            operator_list: {  }
+          group: 1
+        type:
+          id: type
+          table: node_field_data
+          field: type
+          value:
+            article: article
+          entity_type: node
+          entity_field: type
+          plugin_id: bundle
+          expose:
+            operator_limit_selection: false
+            operator_list: {  }
+        translation_target_language:
+          id: translation_target_language
+          table: node_translation
+          field: translation_target_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value: '***LANGUAGE_site_default***'
+          group: 1
+          exposed: true
+          expose:
+            operator_id: ''
+            label: 'Target language'
+            description: ''
+            use_operator: false
+            operator: translation_target_language_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: translation_target_language
+            required: true
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          remove: true
+          limit: false
+          column:
+            target: target
+            source: '0'
+          entity_type: node
+          plugin_id: translation_views_target_language
       sorts:
         created:
           id: created
