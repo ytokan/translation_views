@@ -219,7 +219,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     $this->assertNotContains('de', $language_options);
     $this->assertNotContains('sq', $language_options);
 
-    // Check that view give no result when user have no registered translation skills
+    // No results in views for users without registered translation skills.
     $this->removeSkills();
     $this->drupalGet('/test-translators-content-filter');
     $this->assertSession()->statusCodeEquals(200);
@@ -254,7 +254,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
       'translators_content update content translations',
       'translators_content delete content translations',
       'translate any entity',
-      ]);
+    ]);
     $langcodes = static::getAllTestingLanguages();
     Node::create([
       'type' => 'article',
@@ -264,7 +264,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
 
     $this->drupalLogin($userTranslatorsLimited);
     $this->registerTestSkills();
-    // Check Add translation
+    // Check Add translation.
     $this->drupalGet('/test-translators-content-filter', [
       'query' => [
         'langcode' => 'en',
@@ -291,9 +291,9 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         "table > tbody > tr:nth-child(1) .views-field-translation-operations",
         'Add'
       );
-    // Check edit Edit and Delete translation
+    // Check edit Edit and Delete translation.
     Node::load(1)->addTranslation('fr', ['title' => 'French translation '])
-        ->save();
+      ->save();
     $this->drupalGet('/test-translators-content-filter', [
       'query' => [
         'langcode' => 'en',
@@ -333,4 +333,5 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'Delete'
       );
   }
+
 }

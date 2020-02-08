@@ -140,7 +140,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    * @throws \Behat\Mink\Exception\ExpectationException
    */
   private function goToTestingView() {
-    $target_code  = static::$langcodes[mt_rand(0, 4)];
+    $target_code = static::$langcodes[mt_rand(0, 4)];
     $this->drupalGet('/test_operations_links', [
       'query' => [
         'translation_target_language' => $target_code,
