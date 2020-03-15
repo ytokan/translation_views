@@ -1,8 +1,7 @@
 name: Translation Views
 type: module
 description: Create customized lists and queries of translations from your database.
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8.8 || ^9
 package: Multilingual
 dependencies:
   - drupal:content_translation
