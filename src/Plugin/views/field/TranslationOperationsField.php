@@ -4,7 +4,7 @@ namespace Drupal\translation_views\Plugin\views\field;
 
 use Drupal\content_translation\ContentTranslationManager;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -31,12 +31,6 @@ class TranslationOperationsField extends EntityOperations {
    */
   protected $currentUser;
   /**
-   * Entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManager
-   */
-  protected $entityTypeManager;
-  /**
    * Flag to indicate if translators_content module exists.
    *
    * @var bool
@@ -50,12 +44,12 @@ class TranslationOperationsField extends EntityOperations {
     array $configuration,
     $plugin_id,
     array $plugin_definition,
-    EntityManagerInterface $entity_manager,
     EntityTypeManager $entity_type_manager,
     LanguageManagerInterface $language_manager,
+    EntityRepositoryInterface $entity_repository,
     AccountProxyInterface $account
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager, $language_manager);
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $language_manager, $entity_repository);
     $this->currentUser             = $account;
     $this->entityTypeManager       = $entity_type_manager;
     $this->translatorsModuleExists = \Drupal::moduleHandler()->moduleExists('translators_content');
@@ -72,9 +66,9 @@ class TranslationOperationsField extends EntityOperations {
   ) {
     return new static(
       $configuration, $plugin_id, $plugin_definition,
-      $container->get('entity.manager'),
       $container->get('entity_type.manager'),
       $container->get('language_manager'),
+      $container->get('entity.repository'),
       $container->get('current_user')
     );
   }
@@ -155,7 +149,7 @@ class TranslationOperationsField extends EntityOperations {
     $target_language = $this->languageManager->getLanguage($target_langcode);
 
     /* @var \Drupal\content_translation\ContentTranslationHandlerInterface $handler */
-    $handler = $this->getEntityManager()
+    $handler = $this->getEntityTypeManager()
       ->getHandler($entity->getEntityTypeId(), 'translation');
     $is_default = $entity->getUntranslated()->language()->getId() === $target_langcode ? TRUE : FALSE;
 
