@@ -27,7 +27,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    *
    * @var bool
    */
-  protected $translators_content = FALSE;
+  protected $translatorsContent = FALSE;
   /**
    * Translators skills service.
    *
@@ -52,8 +52,8 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
   public function __construct(array $configuration, $plugin_id, $plugin_definition, LanguageManagerInterface $language_manager, ModuleHandlerInterface $handler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->languageManager = $language_manager;
-    $this->translators_content = $handler->moduleExists('translators_content');
-    if ($this->translators_content && \Drupal::hasService('translators.skills')) {
+    $this->translatorsContent = $handler->moduleExists('translators_content');
+    if ($this->translatorsContent && \Drupal::hasService('translators.skills')) {
       $this->translatorSkills = \Drupal::service('translators.skills');
     }
   }
@@ -73,7 +73,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       '#value' => TRUE,
     ];
 
-    if ($this->translators_content) {
+    if ($this->translatorsContent) {
       // We need to force this option to allow users to use only the languages,
       // specified as the user's translation skills.
       $form['expose']['reduce']['#default_value'] = TRUE;
@@ -104,7 +104,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
     $options['remove']['default'] = TRUE;
     $options['exposed']['default'] = TRUE;
 
-    if ($this->translators_content) {
+    if ($this->translatorsContent) {
       $options['limit'] = ['default' => FALSE];
       $options['column'] = ['default' => ['source' => '', 'target' => 'target']];
     }
@@ -123,12 +123,12 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       $field['#value'] = $field['#default_value'] = '';
     }
     // Show empty registered skills message inside this window.
-    if ($this->translators_content
+    if ($this->translatorsContent
       && $this->options['limit']
       && empty($this->translatorSkills->getAllLangcodes())) {
-        $field['#options'] = ['All' => $this->t('- Any -')];
-        $field['#value'] = $field['#default_value'] = 'All';
-        $this->translatorSkills->showMissingTranslationSkillsWarning();
+      $field['#options'] = ['All' => $this->t('- Any -')];
+      $field['#value'] = $field['#default_value'] = 'All';
+      $this->translatorSkills->showMissingTranslationSkillsWarning();
     }
   }
 
@@ -143,13 +143,13 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
       '#default_value' => $this->options['remove'],
       '#weight' => -50,
     ];
-    // Build values list independently in order to see all the options,
+    // Build values list independently in order to see all the options.
     $form['value']['#options'] = $this->listLanguages(
       LanguageInterface::STATE_CONFIGURABLE
       | LanguageInterface::STATE_SITE_DEFAULT
       | PluginBase::INCLUDE_NEGOTIATED
     );
-    if ($this->translators_content) {
+    if ($this->translatorsContent) {
       $end = $form['clear_markup_end'];
       unset($form['clear_markup_end']);
       $form['limit'] = [
@@ -218,7 +218,7 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    */
   protected function buildLanguageOptions() {
     $options = [];
-    if ($this->translators_content && $this->options['limit']) {
+    if ($this->translatorsContent && $this->options['limit']) {
       $translators_languages = $this->translatorSkills->getTranslationSkills();
       // Handle column options.
       foreach ($this->options['column'] as $name => $column) {
@@ -269,8 +269,10 @@ class TranslationTargetLanguageFilter extends FilterPluginBase implements Contai
    *   Languages array.
    * @param string $column
    *   Column name.
+   * @param array $options
+   *   Available language options.
    */
-  protected function processColumnOption(array $languages, $column, &$options) {
+  protected function processColumnOption(array $languages, $column, array &$options) {
     $key = "language_$column";
     if (isset($languages[$key])) {
       $key = $languages[$key];

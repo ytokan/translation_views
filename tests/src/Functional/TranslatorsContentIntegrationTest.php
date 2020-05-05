@@ -255,7 +255,6 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
       'translators_content delete content translations',
       'translate any entity',
     ]);
-    $langcodes = static::getAllTestingLanguages();
     Node::create([
       'type' => 'article',
       'title' => "English node",

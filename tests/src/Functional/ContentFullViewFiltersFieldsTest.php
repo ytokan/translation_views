@@ -13,6 +13,9 @@ use Drupal\views\Tests\ViewTestData;
  */
 class ContentFullViewFiltersFieldsTest extends ViewTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected $profile = 'standard';
 
   /**
@@ -103,8 +106,7 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
   public function testFilters() {
     $this->drupalGet('translation-views-all-filters-and-fields');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()
-      ->pageTextContains('Translation views all filters and fields');
+    $this->assertSession()->pageTextContains('Translation views all filters and fields');
     $this->assertSession()->pageTextNotContains('001_en_title_node1');
     $this->assertSession()->pageTextContains('002_fr_title_node1');
     $this->assertSession()->pageTextContains('003_de_title_node1');

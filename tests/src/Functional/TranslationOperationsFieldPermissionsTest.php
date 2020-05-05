@@ -100,7 +100,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    * Set up users with different sets of permissions.
    */
   private function setUpUsers() {
-    $this->adminUser  = $this->createUser([], 'test_admin', TRUE);
+    $this->adminUser = $this->createUser([], 'test_admin', TRUE);
     $this->userCreate = $this->createUser(['create content translations']);
     $this->userUpdate = $this->createUser(['update content translations']);
     $this->userDelete = $this->createUser(['delete content translations']);
@@ -185,7 +185,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    */
   public function testTranslationOperationsCreatePermissions() {
     $default_language = \Drupal::languageManager()->getDefaultLanguage();
-    $target_language  = static::$langcodes[mt_rand(0, 4)];
+    $target_language = static::$langcodes[mt_rand(0, 4)];
     $this->assertNotNull($target_language);
     $this->assertNotNull($default_language);
 

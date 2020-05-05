@@ -146,7 +146,6 @@ class TranslationOperationsField extends EntityOperations {
     $target_langcode = $this->getTargetLangcode()
       ? $this->getTargetLangcode()
       : $source_langcode;
-    $target_language = $this->languageManager->getLanguage($target_langcode);
 
     /* @var \Drupal\content_translation\ContentTranslationHandlerInterface $handler */
     $handler = $this->getEntityTypeManager()
@@ -240,7 +239,7 @@ class TranslationOperationsField extends EntityOperations {
     if ($this->moduleHandler->moduleExists('content_moderation') && $pending_revision_enabled) {
       /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
       $storage = $this->entityTypeManager->getStorage($entity_type_id);
-      $entity  = $storage->load($entity->id());
+      $entity = $storage->load($entity->id());
       $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId(
         $entity->id(),
         $target_langcode
