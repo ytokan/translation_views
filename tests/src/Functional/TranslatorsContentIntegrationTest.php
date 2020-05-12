@@ -59,74 +59,11 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
    */
   public function setUp() {
     parent::setUp();
-    $this->setUpTest();
-  }
-
-  /**
-   * Additional steps for tests set up.
-   */
-  protected function setUpTest() {
     $this->drupalLogin($this->rootUser);
     $this->translatorSkills = $this->container->get('translators.skills');
-    $this->createLanguages();
+    $this->createLanguages(['fr', 'de', 'sq']);
     $this->enableTranslation('node', 'article');
     $this->drupalLogout();
-  }
-
-  /**
-   * Get array of all testing languages.
-   *
-   * @return array
-   *   All testing langcodes array.
-   */
-  private static function getAllTestingLanguages() {
-    return array_merge(static::$registeredSkills, static::$unregisteredSkills);
-  }
-
-  /**
-   * Change language settings for entity types.
-   *
-   * @param string $category
-   *   Entity category (e.g. node).
-   * @param string $subcategory
-   *   Entity subcategory (e.g. article).
-   */
-  protected function enableTranslation($category, $subcategory) {
-    $this->drupalPostForm('admin/config/regional/content-language', [
-      "entity_types[$category]"                                                   => 1,
-      "settings[$category][$subcategory][translatable]"                           => 1,
-      "settings[$category][$subcategory][settings][language][language_alterable]" => 1,
-    ], 'Save configuration');
-    \Drupal::entityTypeManager()->clearCachedDefinitions();
-  }
-
-  /**
-   * Register translation skills for testing.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  protected function registerTestSkills() {
-    $this->addSkill(static::$registeredSkills);
-    foreach (static::$registeredSkills as $skill) {
-      $this->assertTrue($this->translatorSkills->hasLangcode($skill));
-    }
-  }
-
-  /**
-   * Create additional languages for testing.
-   */
-  protected function createLanguages() {
-    try {
-      foreach (static::getAllTestingLanguages() as $language) {
-        if ($language === $this->defaultLanguage) {
-          continue;
-        }
-        $this->assertEquals(1, ConfigurableLanguage::createFromLangcode($language)->save());
-      }
-    }
-    catch (EntityStorageException $e) {
-      $this->fail('Additional languages have not been created');
-    }
   }
 
   /**
@@ -145,42 +82,21 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
    */
   public function testTranslatorsLanguageFilterInView() {
     $this->drupalLogin($this->rootUser);
-    $this->registerTestSkills();
-    for ($i = 1; $i <= 10; $i++) {
-      Node::create([
-        'type' => 'article',
-        'title' => 'French node ' . $i,
-        'langcode' => 'fr',
-      ])
-        ->addTranslation('en', ['title' => 'English translation ' . $i])
-        ->save();
-    }
+    $this->addSkill(['en', 'fr']);
+    $node = $this->createTestNode();
+    $this->addAllNodeTranslations($node);
 
+    // Check that all languages are available as target language.
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->statusCodeNotEquals(404);
+    $this->assertResponse(200);
 
-    // Find langcode field element.
-    $langcode_field = $this->getSession()
-      ->getPage()
-      ->findField('translation_target_language');
-    $this->assertNotNull($langcode_field);
+    $this->assertOptionCount('translation_target_language', 4);
+    $this->assertOptionAvailable('translation_target_language', 'en');
+    $this->assertOptionAvailable('translation_target_language', 'fr');
+    $this->assertOptionAvailable('translation_target_language', 'de');
+    $this->assertOptionAvailable('translation_target_language', 'sq');
 
-    // Get all existing options of the langcode filter dropdown.
-    $options = $langcode_field->findAll('xpath', '//option');
-    $this->assertNotNull($options);
-
-    // Prepare array of options' values.
-    $language_options = array_map(function ($option) {
-      return $option->getAttribute('value') ?: $option->getText();
-    }, $options);
-
-    $this->assertCount(4, $language_options);
-    $this->assertContains('en', $language_options);
-    $this->assertContains('fr', $language_options);
-    $this->assertContains('de', $language_options);
-    $this->assertContains('sq', $language_options);
-
+    // Limit target languages to translation skills.
     $this->drupalGet('/admin/structure/views/nojs/handler/test_translators_content_integration/page_1/filter/translation_target_language');
     // Check for the default state of the options.
     $this->assertSession()->checkboxNotChecked('options[limit]');
@@ -194,54 +110,24 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     ], 'Apply');
     $this->click('input[value="Save"]');
 
+    // Check that all languages are available as target language.
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->statusCodeNotEquals(404);
+    $this->assertResponse(200);
 
-    // Find langcode field element.
-    $langcode_field = $this->getSession()
-      ->getPage()
-      ->findField('translation_target_language');
-    $this->assertNotNull($langcode_field);
+    $this->assertOptionCount('translation_target_language', 2);
+    $this->assertOptionAvailable('translation_target_language', 'en');
+    $this->assertOptionAvailable('translation_target_language', 'fr');
+    $this->assertOptionNotAvailable('translation_target_language', 'de');
+    $this->assertOptionNotAvailable('translation_target_language', 'sq');
 
-    // Get all existing options of the langcode filter dropdown.
-    $options = $langcode_field->findAll('xpath', '//option');
-    $this->assertNotNull($options);
-
-    // Prepare array of options' values.
-    $language_options = array_map(function ($option) {
-      return $option->getAttribute('value') ?: $option->getText();
-    }, $options);
-
-    $this->assertCount(2, $language_options);
-    $this->assertContains('en', $language_options);
-    $this->assertContains('fr', $language_options);
-    $this->assertNotContains('de', $language_options);
-    $this->assertNotContains('sq', $language_options);
-
-    // No results in views for users without registered translation skills.
+    // Check results without any registered translation skills.
     $this->removeSkills();
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextNotContains('French node');
-
-    // Find langcode field element.
-    $langcode_field = $this->getSession()
-      ->getPage()
-      ->findField('translation_target_language');
-    $this->assertNotNull($langcode_field);
-
-    // Get all existing options of the langcode filter dropdown.
-    $options = $langcode_field->findAll('xpath', '//option');
-    $this->assertNotNull($options);
-
-    // Prepare array of options' values.
-    $language_options = array_map(function ($option) {
-      return $option->getAttribute('value') ?: $option->getText();
-    }, $options);
-
-    $this->assertCount(1, $language_options);
-    $this->assertContains('All', $language_options);
+    $this->assertResponse(200);
+      $this->assertSession()
+        ->elementNotExists('css', 'table > tbody > tr:nth-child(1)');
+    $this->assertOptionCount('translation_target_language', 1);
+    $this->assertOptionAvailable('translation_target_language', 'All');
 
   }
 
@@ -262,7 +148,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     ])->save();
 
     $this->drupalLogin($userTranslatorsLimited);
-    $this->registerTestSkills();
+    $this->addSkill(['en', 'fr']);
     // Check Add translation.
     $this->drupalGet('/test-translators-content-filter', [
       'query' => [
@@ -270,7 +156,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertResponse(200);
     $this->assertSession()
       ->elementTextContains(
         'css',
@@ -283,7 +169,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'de',
       ],
     ]);
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertResponse(200);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
@@ -299,7 +185,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertResponse(200);
     $this->assertSession()
       ->elementTextContains(
         'css',
@@ -318,7 +204,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'de',
       ],
     ]);
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertResponse(200);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
