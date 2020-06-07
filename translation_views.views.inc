@@ -7,8 +7,8 @@
  * @ingroup views_module_handlers
  */
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException as PluginNotFound;
-use Drupal\translation_views\TranslationViewsFieldDefinitions as FieldDefinitions;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\translation_views\TranslationViewsFieldDefinitions;
 
 /**
  * Implements hook_views_data_alter().
@@ -31,8 +31,8 @@ function translation_views_views_data_alter(array &$data) {
           'views_data'
         );
       }
-      catch (PluginNotFound $e) {
-        throw new PluginNotFound($entity_type_id, sprintf(
+      catch (InvalidPluginDefinitionException $e) {
+        throw new InvalidPluginDefinitionException($entity_type_id, sprintf(
           'The "%s" entity type did not specify views_data handler class.',
           $entity_type->getLabel()
         ));
@@ -67,14 +67,14 @@ function translation_views_views_data_alter(array &$data) {
           ],
         ];
 
-        $translations_table += FieldDefinitions::buildStatusField();
-        $translations_table += FieldDefinitions::buildTargetLanguageField();
-        $translations_table += FieldDefinitions::buildOpLinksField();
-        $translations_table += FieldDefinitions::buildCountField();
+        $translations_table += TranslationViewsFieldDefinitions::buildStatusField();
+        $translations_table += TranslationViewsFieldDefinitions::buildTargetLanguageField();
+        $translations_table += TranslationViewsFieldDefinitions::buildOpLinksField();
+        $translations_table += TranslationViewsFieldDefinitions::buildCountField();
 
         $module_handler = \Drupal::service('module_handler');
         if ($module_handler->moduleExists('content_moderation')) {
-          $translations_table += FieldDefinitions::buildModerationStateField();
+          $translations_table += TranslationViewsFieldDefinitions::buildModerationStateField();
         }
         $translations_table_target['table'] = [
           'group' => $group,
@@ -94,17 +94,17 @@ function translation_views_views_data_alter(array &$data) {
           ],
         ];
 
-        $translations_table_target += FieldDefinitions::buildOutdatedField(
+        $translations_table_target += TranslationViewsFieldDefinitions::buildOutdatedField(
           $data[$field_data_table]['content_translation_outdated']
         );
-        $translations_table_target += FieldDefinitions::buildSourceField(
+        $translations_table_target += TranslationViewsFieldDefinitions::buildSourceField(
           $data[$field_data_table]['content_translation_source']
         );
-        $translations_table_target += FieldDefinitions::buildDefaultLangcodeField(
+        $translations_table_target += TranslationViewsFieldDefinitions::buildDefaultLangcodeField(
           $data[$field_data_table]['default_langcode']
         );
         if (isset($data[$field_data_table]['changed'])) {
-          $translations_table_target += FieldDefinitions::buildChangedField(
+          $translations_table_target += TranslationViewsFieldDefinitions::buildChangedField(
             $data[$field_data_table]['changed']
           );
         }
