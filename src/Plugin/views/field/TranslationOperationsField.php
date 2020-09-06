@@ -142,184 +142,138 @@ class TranslationOperationsField extends EntityOperations {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getTranslationOperations(ContentEntityInterface $entity, $source_langcode) {
-    $links           = [];
     $target_langcode = $this->getTargetLangcode()
       ? $this->getTargetLangcode()
       : $source_langcode;
 
-    /* @var \Drupal\content_translation\ContentTranslationHandlerInterface $handler */
-    $handler = $this->getEntityTypeManager()
-      ->getHandler($entity->getEntityTypeId(), 'translation');
-    $is_default = $entity->getUntranslated()->language()->getId() === $target_langcode ? TRUE : FALSE;
-
-    // Build edit & delete link.
-    if (array_key_exists($target_langcode, $entity->getTranslationLanguages())) {
-      // If the user is allowed to edit the entity we point the edit link to
-      // the entity form, otherwise if we are not dealing with the original
-      // language we point the link to the translation form.
-      if ($is_default) {
-        if ($entity->access('update')
-          && $entity->getEntityType()->hasLinkTemplate('edit-form')) {
-          $links += $this->buildEditLink($entity, $target_langcode);
-        }
-        if ($entity->access('delete')
-        && $entity->getEntityType()->hasLinkTemplate('delete-form')) {
-          $links += $this->buildDeleteLink($entity, $target_langcode);
-        }
-      }
-      else {
-        if ($this->translatorsModuleExists) {
-          if ($handler->getTranslationAccess($entity, 'update', $target_langcode)->isAllowed()) {
-            $links += $this->buildEditLink($entity, $target_langcode);
-          }
-          if ($handler->getTranslationAccess($entity, 'delete', $target_langcode)->isAllowed()) {
-            $links += $this->buildDeleteLink($entity, $target_langcode);
-          }
-        }
-        else {
-          if ($handler->getTranslationAccess($entity, 'update')->isAllowed()) {
-            $links += $this->buildEditLink($entity, $target_langcode);
-          }
-          if ($handler->getTranslationAccess($entity, 'delete')->isAllowed()) {
-            $links += $this->buildDeleteLink($entity, $target_langcode);
-          }
+    // Load correct translation and revision.
+    if ($entity->hasTranslation($target_langcode)) {
+      $entity = $entity->getTranslation($target_langcode);
+    }
+    $entity_type_id = $entity->getEntityTypeId();
+    $use_latest_revisions = $entity->getEntityType()->isRevisionable() && ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id, $entity->bundle());
+    $storage = $this->entityTypeManager->getStorage($entity_type_id);
+    if ($use_latest_revisions) {
+      $entity = $storage->load($entity->id());
+      $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $target_langcode);
+      if ($latest_revision_id) {
+        /** @var \Drupal\Core\Entity\ContentEntityInterface $latest_revision */
+        $latest_revision = $storage->loadRevision($latest_revision_id);
+        // Make sure we do not list removed translations, i.e. translations
+        // that have been part of a default revision but no longer are.
+        if (!$latest_revision->wasDefaultRevision() || $entity->hasTranslation($target_langcode)) {
+          $entity = $latest_revision;
         }
       }
     }
-    // Check if there are pending revisions.
-    elseif ($this->pendingRevisionExist($entity, $target_langcode)) {
-      // If the user is allowed to edit the entity we point the edit link to
-      // the entity form, otherwise if we are not dealing with the original
-      // language we point the link to the translation form.
-      if ($is_default && $entity->access('update')
+
+    // Build translation operation links.
+    /* @var \Drupal\content_translation\ContentTranslationHandlerInterface $handler */
+    $handler = $this->getEntityTypeManager()
+      ->getHandler($entity->getEntityTypeId(), 'translation');
+    $target_language = $this->languageManager->getLanguage($target_langcode);
+    $options = ['language' => $target_language];
+    $is_default_language = $entity->getUntranslated()->language()->getId() === $target_langcode ? TRUE : FALSE;
+    $links = [];
+    if ($entity->hasTranslation($target_langcode)) {
+      // Build edit translation links.
+      if ($entity->access('update')
         && $entity->getEntityType()->hasLinkTemplate('edit-form')) {
-        $links += $this->buildEditLink($entity, $target_langcode);
+        $links += [
+          'edit' => [
+            'title'    => $this->t('Edit'),
+            'url'      => $entity->toUrl('edit-form'),
+            'language' => $target_language,
+          ],
+        ];
       }
-      else {
-        if ($this->translatorsModuleExists
-          && $handler->getTranslationAccess($entity, 'update', $target_langcode)->isAllowed()) {
-          $links += $this->buildEditLink($entity, $target_langcode);
+      elseif (!$is_default_language) {
+        if ($this->translatorsModuleExists && $handler->getTranslationAccess($entity, 'update', $target_langcode)->isAllowed()) {
+          $links += [
+            'edit' => [
+              'title'    => $this->t('Edit'),
+              'url'      => $entity->toUrl('drupal:content-translation-edit', $options)
+                ->setRouteParameter('language', $target_langcode),
+            ],
+          ];
         }
-        elseif ($handler->getTranslationAccess($entity, 'update')->isAllowed()) {
-          $links += $this->buildEditLink($entity, $target_langcode);
+        else {
+          if (!$this->translatorsModuleExists && $handler->getTranslationAccess($entity, 'update')->isAllowed()) {
+            $links += [
+              'edit' => [
+                'title'    => $this->t('Edit'),
+                'url'      => $entity->toUrl('drupal:content-translation-edit', $options)
+                  ->setRouteParameter('language', $target_langcode),
+              ],
+            ];
+          }
+        }
+      }
+      // Build delete translation links.
+      if ($entity->access('delete')
+      && $entity->getEntityType()->hasLinkTemplate('delete-form')) {
+        $links += [
+          'delete' => [
+            'title'    => $this->t('Delete'),
+            'url'      => $entity->toUrl('delete-form'),
+            'language' => $target_language,
+          ],
+        ];
+      }
+      elseif (!$is_default_language && \Drupal::service('content_translation.delete_access')->checkAccess($entity)) {
+        if ($this->translatorsModuleExists && $handler->getTranslationAccess($entity, 'delete', $target_langcode)->isAllowed()) {
+          $links += [
+            'delete' => [
+              'title'    => $this->t('Delete'),
+              'url'      => $entity->toUrl('drupal:content-translation-delete', $options)
+                ->setRouteParameter('language', $target_langcode),
+            ],
+          ];
+        }
+        else {
+          if (!$this->translatorsModuleExists && $handler->getTranslationAccess($entity, 'delete')->isAllowed()) {
+            $links += [
+              'delete' => [
+                'title'    => $this->t('Delete'),
+                'url'      => $entity->toUrl('drupal:content-translation-delete', $options)
+                  ->setRouteParameter('language', $target_langcode),
+              ],
+            ];
+          }
         }
       }
     }
     // Build add link.
-    elseif (!empty($target_langcode) && $entity->isTranslatable()) {
-      if (!$this->translatorsModuleExists
-        && $handler->getTranslationAccess($entity, 'create')->isAllowed()
-      ) {
-        $links += $this->buildAddLink($entity, $source_langcode, $target_langcode);
-      }
-      elseif ($this->translatorsModuleExists
+    elseif (!$entity->hasTranslation($target_langcode) && $entity->isTranslatable()) {
+      $route_name = "entity.$entity_type_id.content_translation_add";
+      $add_url = Url::fromRoute($route_name, [
+        'source'        => $source_langcode,
+        'target'        => $target_langcode,
+        $entity_type_id => $entity->id(),
+      ]);
+      if ($this->translatorsModuleExists
         && $handler->getTranslationAccess($entity, 'create', $source_langcode, $target_langcode)->isAllowed()
       ) {
-        $links += $this->buildAddLink($entity, $source_langcode, $target_langcode);
+        $links += [
+          'add' => [
+            'url'      => $add_url,
+            'language' => $target_language,
+            'title'    => $this->t('Add'),
+          ],
+        ];
+      }
+      elseif (!$this->translatorsModuleExists
+        && $handler->getTranslationAccess($entity, 'create')->isAllowed()
+      ) {
+        $links += [
+          'add' => [
+            'url'      => $add_url,
+            'language' => $target_language,
+            'title'    => $this->t('Add'),
+          ],
+        ];
       }
     }
-
-    return $links;
-  }
-
-  /**
-   * Check if pending revision exist for this translation.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to check for pending revisions.
-   * @param string $target_langcode
-   *   Language ID of the target language.
-   *
-   * @return bool
-   *   TRUE - if pending revision exist, FALSE otherwise.
-   */
-  protected function pendingRevisionExist(ContentEntityInterface $entity, $target_langcode) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $pending_revision_enabled = ContentTranslationManager::isPendingRevisionSupportEnabled($entity_type_id);
-    if ($this->moduleHandler->moduleExists('content_moderation') && $pending_revision_enabled) {
-      /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-      $storage = $this->entityTypeManager->getStorage($entity_type_id);
-      $entity = $storage->load($entity->id());
-      $translation_has_revision = $storage->getLatestTranslationAffectedRevisionId(
-        $entity->id(),
-        $target_langcode
-      );
-      if ($translation_has_revision) {
-        return TRUE;
-      }
-    }
-    return FALSE;
-  }
-
-  /**
-   * Add link builder.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to build add translation link for.
-   * @param string $source_langcode
-   *   Language ID of the source language.
-   * @param string $target_langcode
-   *   Language ID of the target language.
-   *
-   * @return array
-   *   An array representing links.
-   */
-  protected function buildAddLink(ContentEntityInterface $entity, $source_langcode, $target_langcode) {
-    $entity_type_id  = $entity->getEntityTypeId();
-    $route_name      = "entity.$entity_type_id.content_translation_add";
-    $add_url         = Url::fromRoute($route_name, [
-      'source'        => $source_langcode,
-      'target'        => $target_langcode,
-      $entity_type_id => $entity->id(),
-    ]);
-    $target_language = $this->languageManager->getLanguage($target_langcode);
-    $links['add']    = [
-      'url'      => $add_url,
-      'language' => $target_language,
-      'title'    => $this->t('Add'),
-    ];
-    return $links;
-  }
-
-  /**
-   * Delete link builder.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to build delete link for.
-   * @param string $target_langcode
-   *   Language ID of the target language.
-   *
-   * @return array
-   *   An array representing links.
-   */
-  protected function buildDeleteLink(ContentEntityInterface $entity, $target_langcode) {
-    $target_language = $this->languageManager->getLanguage($target_langcode);
-    $links['delete'] = [
-      'url'      => $entity->toUrl('delete-form'),
-      'language' => $target_language,
-      'title'    => $this->t('Delete'),
-    ];
-    return $links;
-  }
-
-  /**
-   * Edit link builder.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to build edit link for.
-   * @param string $target_langcode
-   *   Language ID of the target language.
-   *
-   * @return array
-   *   An array representing links.
-   */
-  protected function buildEditLink(ContentEntityInterface $entity, $target_langcode) {
-    $target_language = $this->languageManager->getLanguage($target_langcode);
-    $links['edit'] = [
-      'url'      => $entity->toUrl('edit-form'),
-      'language' => $target_language,
-      'title'    => $this->t('Edit'),
-    ];
     return $links;
   }
 

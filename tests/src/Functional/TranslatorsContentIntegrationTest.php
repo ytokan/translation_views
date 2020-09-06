@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\translation_views\Functional;
 
-use Drupal\Core\Entity\EntityStorageException;
-use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\translators_content\Functional\TranslatorsContentTestsTrait;
@@ -124,8 +122,8 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     $this->removeSkills();
     $this->drupalGet('/test-translators-content-filter');
     $this->assertResponse(200);
-      $this->assertSession()
-        ->elementNotExists('css', 'table > tbody > tr:nth-child(1)');
+    $this->assertSession()
+      ->elementNotExists('css', 'table > tbody > tr:nth-child(1)');
     $this->assertOptionCount('translation_target_language', 1);
     $this->assertOptionAvailable('translation_target_language', 'All');
 
@@ -176,7 +174,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         "table > tbody > tr:nth-child(1) .views-field-translation-operations",
         'Add'
       );
-    // Check edit Edit and Delete translation.
+    // Check Edit translation for registered language.
     Node::load(1)->addTranslation('fr', ['title' => 'French translation '])
       ->save();
     $this->drupalGet('/test-translators-content-filter', [
@@ -189,15 +187,32 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     $this->assertSession()
       ->elementTextContains(
         'css',
-        "table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a",
+        'table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a',
         'Edit'
       );
+    $this->click('table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a');
+    // @todo: Fix when translators permission handeling is fixed.
+    $this->assertUrl('fr/node/1/edit');
+
+    // Check Delete translation for registered language.
+    $this->drupalGet('/test-translators-content-filter', [
+      'query' => [
+        'langcode' => 'en',
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertResponse(200);
     $this->assertSession()
       ->elementTextContains(
         'css',
-        "table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a",
+        'table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a',
         'Delete'
       );
+    $this->click('table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a');
+    // @todo: Fix when translators permission handeling is fixed.
+    $this->assertUrl('fr/node/1/delete');
+
+    // Check translation operations for not registered languages.
     $this->drupalGet('/test-translators-content-filter', [
       'query' => [
         'langcode' => 'en',

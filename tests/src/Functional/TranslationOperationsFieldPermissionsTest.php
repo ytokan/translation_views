@@ -25,30 +25,6 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    */
   private static $langcodes = ['fr', 'de', 'it', 'af', 'sq'];
   /**
-   * User with permission to create translation.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  private $userCreate;
-  /**
-   * User with permission to update translation.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  private $userUpdate;
-  /**
-   * User with permission to delete translation.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  private $userDelete;
-  /**
-   * Admin user.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  private $adminUser;
-  /**
    * {@inheritdoc}
    */
   public static $modules = [
@@ -74,8 +50,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
   protected function setUp($import_test_views = TRUE) {
     parent::setUp($import_test_views);
 
-    $this->setUpUsers();
-    $this->drupalLogin($this->adminUser);
+    $this->drupalLogin($this->rootUser);
 
     // Set up testing views.
     ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
@@ -94,16 +69,6 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     ], 'Save');
 
     $this->drupalLogout();
-  }
-
-  /**
-   * Set up users with different sets of permissions.
-   */
-  private function setUpUsers() {
-    $this->adminUser = $this->createUser([], 'test_admin', TRUE);
-    $this->userCreate = $this->createUser(['create content translations']);
-    $this->userUpdate = $this->createUser(['update content translations']);
-    $this->userDelete = $this->createUser(['delete content translations']);
   }
 
   /**
@@ -132,21 +97,6 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
       "settings[$category][$subcategory][settings][language][language_alterable]" => 1,
     ], 'Save configuration');
     \Drupal::entityTypeManager()->clearCachedDefinitions();
-  }
-
-  /**
-   * Go to the /translate/content page.
-   *
-   * @throws \Behat\Mink\Exception\ExpectationException
-   */
-  private function goToTestingView() {
-    $target_code = static::$langcodes[mt_rand(0, 4)];
-    $this->drupalGet('/test_operations_links', [
-      'query' => [
-        'translation_target_language' => $target_code,
-      ],
-    ]);
-    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -189,10 +139,8 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertNotNull($target_language);
     $this->assertNotNull($default_language);
 
-    $this->drupalLogin($this->userCreate);
-
-    $this->assertTrue($this->userCreate->hasPermission('create content translations'));
-    $this->assertFalse($this->userCreate->hasPermission('translate any entity'));
+    $userCreate = $this->createUser(['create content translations']);
+    $this->drupalLogin($userCreate);
 
     $this->drupalGet('/translate/content', [
       'query' => [
@@ -209,7 +157,7 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     );
 
     $this->addPermissionsForAuthUser(['translate any entity']);
-    $this->assertTrue($this->userCreate->hasPermission('translate any entity'));
+    $this->assertTrue($userCreate->hasPermission('translate any entity'));
 
     $this->drupalGet('/translate/content', [
       'query' => [
@@ -236,25 +184,53 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    */
   public function testTranslationOperationsUpdatePermissions() {
     $this->translateNode();
-    $this->assertTrue($this->userUpdate->hasPermission('update content translations'));
-    $this->assertFalse($this->userUpdate->hasPermission('translate any entity'));
-    $this->drupalLogin($this->userUpdate);
-    $this->goToTestingView();
+    $userUpdate = $this->createUser(['update content translations']);
+    $this->drupalLogin($userUpdate);
+    // Check without translation permission.
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
         ".view-content > div:nth-child(1) .views-field-translation-operations",
         'Edit'
       );
+    // Check with translation permission.
     $this->addPermissionsForAuthUser(['translate article node']);
-    $this->assertTrue($this->userUpdate->hasPermission('translate article node'));
-    $this->goToTestingView();
+    $this->assertTrue($userUpdate->hasPermission('translate article node'));
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementTextContains(
         'css',
-        ".view-content > div:nth-child(1) .views-field-translation-operations ul li a",
+        '.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a',
         'Edit'
       );
+    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a');
+    $this->assertUrl('/fr/node/1/translations/edit/fr');
+    // Check with edit permission.
+    $this->addPermissionsForAuthUser(['edit any article content']);
+    $this->assertTrue($userUpdate->hasPermission('edit any article content'));
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations ul .edit a",
+        'Edit'
+      );
+    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a');
+    $this->assertUrl('/fr/node/1/edit');
   }
 
   /**
@@ -265,25 +241,52 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    */
   public function testTranslationOperationsDeletePermissions() {
     $this->translateNode();
-    $this->assertTrue($this->userDelete->hasPermission('delete content translations'));
-    $this->assertFalse($this->userDelete->hasPermission('translate any entity'));
-    $this->drupalLogin($this->userDelete);
-    $this->goToTestingView();
+    $userDelete = $this->createUser(['delete content translations']);
+    $this->drupalLogin($userDelete);
+    // Check without translation permission.
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
         ".view-content > div:nth-child(1) .views-field-translation-operations",
         'Delete'
       );
+    // Check with translation permission.
     $this->addPermissionsForAuthUser(['translate article node']);
-    $this->assertTrue($this->userDelete->hasPermission('translate article node'));
-    $this->goToTestingView();
+    $this->assertTrue($userDelete->hasPermission('translate article node'));
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
     $this->assertSession()
       ->elementTextContains(
         'css',
-        ".view-content > div:nth-child(1) .views-field-translation-operations ul li a",
+        ".view-content > div:nth-child(1) .views-field-translation-operations ul .delete a",
         'Delete'
       );
+    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .delete a');
+    $this->assertUrl('/fr/node/1/translations/delete/fr');
+    // Check with edit permission.
+    $this->addPermissionsForAuthUser(['delete any article content']);
+    $this->assertTrue($userDelete->hasPermission('delete any article content'));
+    $this->drupalGet('/test_operations_links', [
+      'query' => [
+        'translation_target_language' => 'fr',
+      ],
+    ]);
+    $this->assertSession()
+      ->elementTextContains(
+        'css',
+        ".view-content > div:nth-child(1) .views-field-translation-operations ul .delete a",
+        'Delete'
+      );
+    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .delete a');
+    $this->assertUrl('/fr/node/1/delete');
   }
 
 }

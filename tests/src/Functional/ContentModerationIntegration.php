@@ -17,6 +17,12 @@ use Drupal\workflows\Entity\Workflow;
 class ContentModerationIntegration extends ViewTestBase {
 
   /**
+   * List of the additional language IDs to be created for the tests.
+   *
+   * @var array
+   */
+  private static $langcodes = ['fr', 'de'];
+  /**
    * {@inheritdoc}
    */
   protected $profile = 'standard';
@@ -41,8 +47,10 @@ class ContentModerationIntegration extends ViewTestBase {
     $this->drupalLogin($this->rootUser);
     // Import test views.
     ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
-    // Create additional language.
-    ConfigurableLanguage::createFromLangcode('af')->save();
+    // Create additional languages.
+    foreach (self::$langcodes as $langcode) {
+      ConfigurableLanguage::createFromLangcode($langcode)->save();
+    }
 
     // Enable translation for article nodes.
     $this->drupalPostForm('admin/config/regional/content-language', [
@@ -69,6 +77,15 @@ class ContentModerationIntegration extends ViewTestBase {
     $this->drupalLogin($this->rootUser);
     // Create node for test.
     $node = $this->createNode(['type' => 'article']);
+    // Create translations
+    foreach (self::$langcodes as $langcode) {
+      $node->addTranslation($langcode, [
+        'title' => $this->randomMachineName(),
+        'status' => 0,
+        'moderation_state[0][state]' => 'draft'
+      ])
+        ->save();
+    }
 
     // Ensure we have moderation state "Draft" by default
     // in the newly created node.
@@ -76,27 +93,86 @@ class ContentModerationIntegration extends ViewTestBase {
     $this->assertFalse($node->get('moderation_state')->isEmpty());
     $this->assertEquals('draft', $node->get('moderation_state')->first()->getString());
 
-    // Go to the testing view's page.
-    $this->drupalGet('/content-moderation-integration-test');
+    // Check that created node has "Draft" moderation state in English.
+    $this->drupalGet('/content-moderation-integration-test', [
+      'query' => [
+        'translation_target_language' => 'en',
+      ],
+    ]);
     $this->assertSession()->statusCodeEquals(200);
-    // Check that created node has "Draft" moderation state by default.
     $this->assertSession()->elementTextContains(
       'css',
-      '.views-field-translation-moderation-state span',
+      'table > tbody > tr:nth-child(1) .views-field-translation-moderation-state',
+      'Draft'
+    );
+
+    // Check that created node has "Draft" moderation state in German.
+    $this->drupalGet('/content-moderation-integration-test', [
+      'query' => [
+        'translation_target_language' => 'de',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->elementTextContains(
+      'css',
+      'table > tbody > tr:nth-child(1) .views-field-translation-moderation-state',
       'Draft'
     );
 
     // Change moderation state to "Published".
     $node->set('moderation_state', 'published')->save();
 
-    // Reload the testing view's page.
-    $this->drupalGet('/content-moderation-integration-test');
+    // Check that created node has "Published" moderation state in English.
+    $this->drupalGet('/content-moderation-integration-test', [
+      'query' => [
+        'translation_target_language' => 'en',
+      ],
+    ]);
     $this->assertSession()->statusCodeEquals(200);
-    // Check that the moderation state value has been changed in view's field.
     $this->assertSession()->elementTextContains(
       'css',
-      '.views-field-translation-moderation-state span',
+      'table > tbody > tr:nth-child(1) .views-field-translation-moderation-state',
       'Published'
+    );
+  }
+
+  /**
+   * Test view's field "Translation Operation".
+   */
+  public function testTranslationOperations() {
+    // Create node for test.
+    $node = $this->createNode(['type' => 'article']);
+    // Create translations
+    foreach (self::$langcodes as $langcode) {
+      $node->addTranslation($langcode, [
+        'title' => $this->randomMachineName(),
+        'status' => 0,
+        'moderation_state[0][state]' => 'draft'
+      ])
+        ->save();
+    }
+
+    // Ensure we have moderation state "Draft" by default
+    // in the newly created node.
+    $this->assertTrue($node->hasField('moderation_state'));
+    $this->assertFalse($node->get('moderation_state')->isEmpty());
+    $this->assertEquals('draft', $node->get('moderation_state')->first()->getString());
+
+    // Login as a translator.
+    $translator = $this->createUser(['translate article node', 'update content translations']);
+    $this->drupalLogin($translator);
+
+    // Check that operations are provided for translation "Draft".
+    $this->drupalGet('/content-moderation-integration-test', [
+      'query' => [
+        'translation_target_language' => 'de',
+      ],
+    ]);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->elementTextContains(
+      'css',
+      'table > tbody > tr:nth-child(1) .views-field-translation-operations ul li a',
+      'Edit'
     );
   }
 
