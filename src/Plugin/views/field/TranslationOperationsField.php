@@ -5,7 +5,7 @@ namespace Drupal\translation_views\Plugin\views\field;
 use Drupal\content_translation\ContentTranslationManager;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
@@ -44,7 +44,7 @@ class TranslationOperationsField extends EntityOperations {
     array $configuration,
     $plugin_id,
     array $plugin_definition,
-    EntityTypeManager $entity_type_manager,
+    EntityTypeManagerInterface $entity_type_manager,
     LanguageManagerInterface $language_manager,
     EntityRepositoryInterface $entity_repository,
     AccountProxyInterface $account

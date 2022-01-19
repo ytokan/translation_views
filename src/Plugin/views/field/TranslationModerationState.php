@@ -4,7 +4,7 @@ namespace Drupal\translation_views\Plugin\views\field;
 
 use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\content_translation\ContentTranslationManager;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -32,7 +32,7 @@ class TranslationModerationState extends FieldPluginBase {
   /**
    * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManager
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
@@ -45,7 +45,7 @@ class TranslationModerationState extends FieldPluginBase {
     $plugin_definition,
     ModerationInformationInterface $moderation_info,
     LanguageManagerInterface $language_manager,
-    EntityTypeManager $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
