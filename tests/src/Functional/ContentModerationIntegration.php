@@ -40,20 +40,19 @@ class ContentModerationIntegration extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp($import_test_views = TRUE) {
+  public function setUp($import_test_views = TRUE, $modules = ['translation_views_test_views']) {
     // Inherit set up from the parent class.
-    parent::setUp($import_test_views);
+    parent::setUp($import_test_views, $modules);
     // Login as a root user.
     $this->drupalLogin($this->rootUser);
-    // Import test views.
-    ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
     // Create additional languages.
     foreach (self::$langcodes as $langcode) {
       ConfigurableLanguage::createFromLangcode($langcode)->save();
     }
 
     // Enable translation for article nodes.
-    $this->drupalPostForm('admin/config/regional/content-language', [
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm([
       "entity_types[node]"                                              => 1,
       "settings[node][article][translatable]"                           => 1,
       "settings[node][article][settings][language][language_alterable]" => 1,

@@ -23,6 +23,7 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
    * @var array
    */
   private static $langcodes = ['fr', 'de', 'it', 'af', 'sq'];
+
   /**
    * {@inheritdoc}
    */
@@ -58,8 +59,13 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE) {
-    parent::setUp($import_test_views);
+  //protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp($import_test_views = TRUE, $modules = []) {
+    parent::setUp($import_test_views, self::$modules);
 
     $this->adminUser = $this->createUser([], 'test_admin', TRUE);
     $this->drupalLogin($this->adminUser);
@@ -69,18 +75,19 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
       ->getId();
 
     // Set up testing views.
-    ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
+    //ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
     try {
       $this->setUpLanguages();
     }
     catch (EntityStorageException $e) {
-      $this->verbose($e->getMessage());
+      dump($e->getMessage());
     }
     // Enable translation for Article nodes.
     $this->enableTranslation('node', 'article');
 
+    $this->drupalGet('node/add/article');
     // Create testing node.
-    $this->drupalPostForm('node/add/article', [
+    $this->submitForm([
       'title[0][value]' => $this->randomString(),
     ], 'Save');
 
@@ -107,7 +114,8 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
    *   Entity subcategory (e.g. article).
    */
   private function enableTranslation($category, $subcategory) {
-    $this->drupalPostForm('admin/config/regional/content-language', [
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm([
       "entity_types[$category]"                                                   => 1,
       "settings[$category][$subcategory][translatable]"                           => 1,
       "settings[$category][$subcategory][settings][language][language_alterable]" => 1,
@@ -195,14 +203,14 @@ class TranslationOperationTargetLanguageTest extends ViewTestBase {
     $this->assertSession()
       ->elementAttributeContains(
         'css',
-        "{$base_selector}.edit a",
+        "{$base_selector} a[href$='/edit']",
         'href',
         "/$target_language/node/1/edit"
       );
     $this->assertSession()
       ->elementAttributeContains(
         'css',
-        "{$base_selector}.delete a",
+        "{$base_selector} a[href$='/delete']",
         'href',
         "/$target_language/node/1/delete"
       );

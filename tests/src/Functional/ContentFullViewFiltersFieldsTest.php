@@ -35,8 +35,8 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE) {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = ['translation_views_test_views']) {
+    parent::setUp($import_test_views, $modules);
 
     $user = $this->drupalCreateUser([
       'administer site configuration',
@@ -53,8 +53,6 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
     ]);
     $this->drupalLogin($user);
 
-    ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
-
     $langcodes = ['de', 'fr'];
     foreach ($langcodes as $langcode) {
       ConfigurableLanguage::createFromLangcode($langcode)->save();
@@ -66,7 +64,8 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
       'settings[node][article][translatable]'                           => 1,
       'settings[node][article][settings][language][language_alterable]' => 1,
     ];
-    $this->drupalPostForm('admin/config/regional/content-language', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm($edit, t('Save configuration'));
     \Drupal::entityTypeManager()->clearCachedDefinitions();
 
     // Create a node in en (node1).
@@ -74,30 +73,34 @@ class ContentFullViewFiltersFieldsTest extends ViewTestBase {
       'title[0][value]'    => '001_en_title_node1',
       'langcode[0][value]' => 'en',
     ];
-    $this->drupalPostForm('node/add/article', $edit, t('Save'));
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, t('Save'));
     // Create a translation in fr (node1).
     $edit = [
       'title[0][value]' => '002_fr_title_node1',
     ];
-    $this->drupalPostForm('node/1/translations/add/en/fr', $edit, t('Save (this translation)'));
+    $this->drupalGet('node/1/translations/add/en/fr');
+    $this->submitForm($edit, t('Save (this translation)'));
     // Create a translation in de (node1).
     $edit = [
       'title[0][value]' => '003_de_title_node1',
     ];
-    $this->drupalPostForm('node/1/translations/add/en/de', $edit, t('Save (this translation)'));
+    $this->drupalGet('node/1/translations/add/en/de');
+    $this->submitForm($edit, t('Save (this translation)'));
 
     // Create a node in de (node2).
     $edit = [
       'title[0][value]'    => '004_de_title_node2',
       'langcode[0][value]' => 'de',
     ];
-    $this->drupalPostForm('node/add/article', $edit, t('Save'));
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, t('Save'));
     // Create a translation in fr (node2).
     $edit = [
       'title[0][value]' => '005_fr_title_node2',
     ];
-    $this->drupalPostForm('node/2/translations/add/de/fr', $edit, t('Save (this translation)'));
-
+    $this->drupalGet('node/2/translations/add/de/fr');
+    $this->submitForm($edit, t('Save (this translation)'));
   }
 
   /**

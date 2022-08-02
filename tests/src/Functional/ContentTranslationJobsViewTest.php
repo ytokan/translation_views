@@ -56,7 +56,8 @@ class ContentTranslationJobsViewTest extends BrowserTestBase {
       'settings[node][article][translatable]'                           => 1,
       'settings[node][article][settings][language][language_alterable]' => 1,
     ];
-    $this->drupalPostForm('admin/config/regional/content-language', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm($edit, t('Save configuration'));
     \Drupal::entityTypeManager()->clearCachedDefinitions();
 
     // Create node1 in german.
@@ -64,27 +65,31 @@ class ContentTranslationJobsViewTest extends BrowserTestBase {
       'title[0][value]'    => 'node1 de',
       'langcode[0][value]' => 'de',
     ];
-    $this->drupalPostForm('node/add/article', $edit, t('Save'));
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, t('Save'));
 
     // Create node1 translation in french.
     $edit = [
       'title[0][value]'    => 'node1 fr',
     ];
-    $this->drupalPostForm('node/1/translations/add/de/fr', $edit, t('Save (this translation)'));
+    $this->drupalGet('node/1/translations/add/de/fr');
+    $this->submitForm($edit, t('Save (this translation)'));
 
     // Create node2 in english.
     $edit = [
       'title[0][value]'    => 'node2 en',
       'langcode[0][value]' => 'en',
     ];
-    $this->drupalPostForm('node/add/article', $edit, t('Save'));
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, t('Save'));
 
     // Create node3 in french.
     $edit = [
       'title[0][value]'    => 'node3 fr',
       'langcode[0][value]' => 'fr',
     ];
-    $this->drupalPostForm('node/add/article', $edit, t('Save'));
+    $this->drupalGet('node/add/article');
+    $this->submitForm($edit, t('Save'));
   }
 
   /**

@@ -47,24 +47,25 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE) {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = []) {
+    parent::setUp($import_test_views, self::$modules);
 
     $this->drupalLogin($this->rootUser);
 
     // Set up testing views.
-    ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
+    //ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
     try {
       $this->setUpLanguages();
     }
     catch (EntityStorageException $e) {
-      $this->verbose($e->getMessage());
+      dump($e->getMessage());
     }
     // Enable translation for Article nodes.
     $this->enableTranslation('node', 'article');
 
     // Create testing node.
-    $this->drupalPostForm('node/add/article', [
+    $this->drupalGet('node/add/article');
+    $this->submitForm([
       'title[0][value]' => $this->randomString(),
     ], 'Save');
 
@@ -91,7 +92,8 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
    *   Entity subcategory (e.g. article).
    */
   private function enableTranslation($category, $subcategory) {
-    $this->drupalPostForm('admin/config/regional/content-language', [
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm([
       "entity_types[$category]"                                                   => 1,
       "settings[$category][$subcategory][translatable]"                           => 1,
       "settings[$category][$subcategory][settings][language][language_alterable]" => 1,
@@ -207,14 +209,15 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
       ],
     ]);
     $this->assertSession()->statusCodeEquals(200);
+    $base_edit_op_selector = '.view-content > div:nth-child(1) .views-field-translation-operations ul li';
     $this->assertSession()
       ->elementTextContains(
         'css',
-        '.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a',
+        "$base_edit_op_selector a[href$='/edit/fr']",
         'Edit'
       );
-    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a');
-    $this->assertUrl('/fr/node/1/translations/edit/fr');
+    $this->click("$base_edit_op_selector a[href$='/edit/fr']");
+    $this->assertSession()->addressEquals('/fr/node/1/translations/edit/fr');
     // Check with edit permission.
     $this->addPermissionsForAuthUser(['edit any article content']);
     $this->assertTrue($userUpdate->hasPermission('edit any article content'));
@@ -226,11 +229,11 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains(
         'css',
-        ".view-content > div:nth-child(1) .views-field-translation-operations ul .edit a",
+        "$base_edit_op_selector a[href$='/edit']",
         'Edit'
       );
-    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .edit a');
-    $this->assertUrl('/fr/node/1/edit');
+    $this->click("$base_edit_op_selector a[href$='/edit']");
+    $this->assertSession()->addressEquals('/fr/node/1/edit');
   }
 
   /**
@@ -263,14 +266,15 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
+    $base_delete_op_selector = '.view-content > div:nth-child(1) .views-field-translation-operations ul li';
     $this->assertSession()
       ->elementTextContains(
         'css',
-        ".view-content > div:nth-child(1) .views-field-translation-operations ul .delete a",
+        "$base_delete_op_selector a[href$='/delete/fr']",
         'Delete'
       );
-    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .delete a');
-    $this->assertUrl('/fr/node/1/translations/delete/fr');
+    $this->click("$base_delete_op_selector a[href$='/delete/fr']");
+    $this->assertSession()->addressEquals('/fr/node/1/translations/delete/fr');
     // Check with edit permission.
     $this->addPermissionsForAuthUser(['delete any article content']);
     $this->assertTrue($userDelete->hasPermission('delete any article content'));
@@ -282,11 +286,11 @@ class TranslationOperationsFieldPermissionsTest extends ViewTestBase {
     $this->assertSession()
       ->elementTextContains(
         'css',
-        ".view-content > div:nth-child(1) .views-field-translation-operations ul .delete a",
+        "$base_delete_op_selector a[href$='/delete']",
         'Delete'
       );
-    $this->click('.view-content > div:nth-child(1) .views-field-translation-operations ul .delete a');
-    $this->assertUrl('/fr/node/1/delete');
+    $this->click("$base_delete_op_selector a[href$='/delete']");
+    $this->assertSession()->addressEquals('/fr/node/1/delete');
   }
 
 }

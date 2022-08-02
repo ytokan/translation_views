@@ -34,6 +34,11 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
   private $viewPath = 'comment-translation';
 
   /**
+   * {@inheritdoc}
+   */
+   protected $defaultTheme = 'stark';
+
+  /**
    * Checks that text is in specific row.
    *
    * @param int $row_number
@@ -90,7 +95,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
    *   Entity subcategory (e.g. Article).
    */
   private function enableTranslation($category, $subcategory) {
-    $this->drupalPostForm('admin/config/regional/content-language', [
+    $this->drupalGet('admin/config/regional/content-language');
+    $this->submitForm([
       "entity_types[$category]"                                                   => 1,
       "settings[$category][$subcategory][translatable]"                           => 1,
       "settings[$category][$subcategory][settings][language][language_alterable]" => 1,
@@ -127,8 +133,8 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE) {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = ['translation_views_test_views']) {
+    parent::setUp($import_test_views, $modules);
 
     $user = $this->drupalCreateUser([
       'administer content types',
@@ -154,8 +160,6 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
 
     $this->drupalLogin($user);
 
-    ViewTestData::createTestViews(get_class($this), ['translation_views_test_views']);
-
     // Add two languages.
     $this->addLanguages(['de', 'fr']);
 
@@ -163,15 +167,18 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
     $this->enableTranslation('comment', 'comment');
 
     // Add 3 nodes.
-    $this->drupalPostForm('node/add/article', [
+    $this->drupalGet('node/add/article');
+    $this->submitForm([
       'title[0][value]'         => 'node 1',
       'created[0][value][date]' => '2018-04-01',
     ], t('Save'));
-    $this->drupalPostForm('node/add/article', [
+    $this->drupalGet('node/add/article');
+    $this->submitForm([
       'title[0][value]'         => 'node 2',
       'created[0][value][date]' => '2018-04-02',
     ], t('Save'));
-    $this->drupalPostForm('node/add/article', [
+    $this->drupalGet('node/add/article');
+    $this->submitForm([
       'title[0][value]'         => 'node 3',
       'created[0][value][date]' => '2018-04-03',
     ], t('Save'));
@@ -183,42 +190,48 @@ class CommentFullViewFiltersFieldsTest extends ViewTestBase {
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 1 en comment',
     ];
-    $this->drupalPostForm('node/1', $edit, 'Save');
+    $this->drupalGet('node/1');
+    $this->submitForm($edit, 'Save');
     // Comment 2.
     $edit = [
       'langcode[0][value]'     => 'de',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 1 de comment',
     ];
-    $this->drupalPostForm('node/1', $edit, 'Save');
+    $this->drupalGet('node/1');
+    $this->submitForm($edit, 'Save');
     // Comment 3.
     $edit = [
       'langcode[0][value]'     => 'de',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 2 de comment',
     ];
-    $this->drupalPostForm('node/2', $edit, 'Save');
+    $this->drupalGet('node/2');
+    $this->submitForm($edit, 'Save');
     // Comment 4.
     $edit = [
       'langcode[0][value]'     => 'fr',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 2 fr comment',
     ];
-    $this->drupalPostForm('node/2', $edit, 'Save');
+    $this->drupalGet('node/2');
+    $this->submitForm($edit, 'Save');
     // Comment 5.
     $edit = [
       'langcode[0][value]'     => 'fr',
       'comment_body[0][value]' => $this->loremIpsum,
       'subject[0][value]'      => 'node 3 fr comment',
     ];
-    $this->drupalPostForm('node/3', $edit, 'Save');
+    $this->drupalGet('node/3');
+    $this->submitForm($edit, 'Save');
     // Comment 6.
     $edit = [
       'content_translation[retranslate]' => 1,
       'comment_body[0][value]'           => $this->loremIpsum,
       'subject[0][value]'                => 'node 3 en from fr comment',
     ];
-    $this->drupalPostForm('comment/5/translations/add/fr/en', $edit, 'Save');
+    $this->drupalGet('comment/5/translations/add/fr/en');
+    $this->submitForm($edit, 'Save');
   }
 
   /**

@@ -28,6 +28,13 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
   public static $modules = ['translation_views_translators_test'];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  protected $adminTheme = 'stark';
+
+  /**
    * Translators skills service.
    *
    * @var \Drupal\translators\Services\TranslatorSkills
@@ -57,6 +64,19 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
    */
   public function setUp() {
     parent::setUp();
+
+    // By default Drupal 9.4 uses Claro theme in "standard" install profile.
+    // The submit buttons in this theme located outside of "form" element.
+    // The above is true for "/admin/structure/views/nojs/handler" like paths.
+    // So to avoid failure on submitting form,
+    // within testTranslatorsLanguageFilterInView,
+    // we need to change default admin theme.
+    \Drupal::service('theme_installer')->install([$this->adminTheme]);
+    \Drupal::configFactory()
+      ->getEditable('system.theme')
+      ->set('admin', $this->adminTheme)
+      ->save();
+
     $this->drupalLogin($this->rootUser);
     $this->translatorSkills = $this->container->get('translators.skills');
     $this->createLanguages(['fr', 'de', 'sq']);
@@ -86,7 +106,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
 
     // Check that all languages are available as target language.
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->assertOptionCount('translation_target_language', 4);
     $this->assertOptionAvailable('translation_target_language', 'en');
@@ -101,16 +121,18 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     $this->assertSession()->checkboxNotChecked('options[column][source]');
     $this->assertSession()->checkboxChecked('options[column][target]');
     // Update options.
-    $this->drupalPostForm(NULL, [
-      'options[limit]'        => 1,
-      'options[column][source]' => 1,
-      'options[column][target]'   => 1,
+    $this->submitForm([
+      'options[limit]'          => TRUE,
+      'options[column][source]' => TRUE,
+      'options[column][target]' => TRUE,
     ], 'Apply');
-    $this->click('input[value="Save"]');
+
+    $this->drupalGet('/admin/structure/views/view/test_translators_content_integration/edit/page_1');
+    $this->submitForm([], 'Save');
 
     // Check that all languages are available as target language.
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     $this->assertOptionCount('translation_target_language', 2);
     $this->assertOptionAvailable('translation_target_language', 'en');
@@ -121,7 +143,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
     // Check results without any registered translation skills.
     $this->removeSkills();
     $this->drupalGet('/test-translators-content-filter');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementNotExists('css', 'table > tbody > tr:nth-child(1)');
     $this->assertOptionCount('translation_target_language', 1);
@@ -154,7 +176,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementTextContains(
         'css',
@@ -167,7 +189,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'de',
       ],
     ]);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
@@ -183,16 +205,17 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
+    $edit_op_selector = 'table > tbody > tr:nth-child(1) .views-field-translation-operations ul li a[href$="/edit"]';
     $this->assertSession()
       ->elementTextContains(
         'css',
-        'table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a',
+        $edit_op_selector,
         'Edit'
       );
-    $this->click('table > tbody > tr:nth-child(1) .views-field-translation-operations ul .edit a');
+    $this->click($edit_op_selector);
     // @todo: Fix when translators permission handeling is fixed.
-    $this->assertUrl('fr/node/1/edit');
+    $this->assertSession()->addressEquals('fr/node/1/edit');
 
     // Check Delete translation for registered language.
     $this->drupalGet('/test-translators-content-filter', [
@@ -201,16 +224,17 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'fr',
       ],
     ]);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
+    $delete_op_selector = 'table > tbody > tr:nth-child(1) .views-field-translation-operations ul li a[href$="/delete"]';
     $this->assertSession()
       ->elementTextContains(
         'css',
-        'table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a',
+        $delete_op_selector,
         'Delete'
       );
-    $this->click('table > tbody > tr:nth-child(1) .views-field-translation-operations ul .delete a');
+    $this->click($delete_op_selector);
     // @todo: Fix when translators permission handeling is fixed.
-    $this->assertUrl('fr/node/1/delete');
+    $this->assertSession()->addressEquals('fr/node/1/delete');
 
     // Check translation operations for not registered languages.
     $this->drupalGet('/test-translators-content-filter', [
@@ -219,7 +243,7 @@ class TranslatorsContentIntegrationTest extends BrowserTestBase {
         'translation_target_language' => 'de',
       ],
     ]);
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()
       ->elementTextNotContains(
         'css',
